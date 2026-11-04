@@ -3,7 +3,7 @@
 > This is where every file lives and what it's responsible for. Read it before creating a file.
 > It complements `ARCHITECTURE.md` (what the system does) and `AGENTS.md` (how to work).
 > If you add, move or rename a file, update this document in the same change.
-> Every contribution must also update `ROADMAP.md` (task status, header progress, Changelog line). See `ROADMAP.md` §1.
+> Every contribution must also update `ROADMAP.md` (your task row + Changelog line). See `ROADMAP.md` §1.
 
 ---
 
@@ -18,6 +18,8 @@ admit/
 ├── ARCHITECTURE_ESSENTIALS.md    # short reference for agents
 ├── project_structure.md          # this file
 ├── ROADMAP.md                    # live task list + status — UPDATE IN EVERY CONTRIBUTION
+├── tools/roadmap.py              # updates ROADMAP rows; recomputes the header after merges
+├── docs/ISSUES.md                # index of GitHub issues by phase, wave and roadmap ID
 ├── README.md                     # judge-facing: problem, "do X, see Y", AI/library disclosure
 ├── LICENSE                       # MIT
 │
@@ -230,7 +232,7 @@ packages/core   ◄──  apps/web
 
 | You're adding… | Put it in… | Also update |
 |---|---|---|
-| **Anything at all** | — | **`ROADMAP.md`**: task status, header progress, Changelog line |
+| **Anything at all** | — | **`ROADMAP.md`**: your task row + Changelog line |
 | A contract method | The domain module in `src/`, registered in `lib.rs` if needed | `tests/<area>.rs`, `packages/core/src/contract.ts`, ARCHITECTURE §5 |
 | A contract type or field | `types.rs` | `packages/core/src/types.ts`, ARCHITECTURE §4 |
 | An event | `events.rs` | ARCHITECTURE §7 |

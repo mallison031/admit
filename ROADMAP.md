@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
 | **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
-| **Must progress** | 12 / 104 Must tasks done (12%) |
-| **Overall progress** | 12 / 113 tasks done (11%) — 104 Must · 6 Should · 3 Could |
+| **Must progress** | 12 / 105 Must tasks done (11%) |
+| **Overall progress** | 12 / 114 tasks done (11%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -24,11 +24,10 @@ Every commit or PR that changes code, tests, config or docs must also update `RO
 3. **New work discovered:** add a task with the next free ID in the right phase. Never reuse IDs.
 4. **Cut or deferred work:** never delete a row. Set ⛔ (cut) or ⏸ (deferred) and give the reason in `Notes`. Cutting a **Must** task needs the user's approval; record it in ARCHITECTURE §14 too.
 5. **Blocked:** set 🔴 and name what blocks it.
-6. **Recompute the header:** `Last updated`, `Current phase`, `Next task`, `Must progress`, `Overall progress`, `Days left`.
-   - Progress = tasks marked ✅ ÷ tasks not marked ⛔.
-   - Count Must and overall separately.
+6. **Don't edit the header in a contribution.** After each merge the maintainer runs `python3 tools/roadmap.py ROADMAP.md` (recomputes Must and overall progress) and updates `Last updated`, `Current phase`, `Next task` and `Days left`. This keeps parallel PRs from conflicting.
 7. **Add one line to the Changelog (§6)**, newest first: date, task IDs, what changed, test result.
 8. **Never tick a task whose "Done when" isn't fully met.** Never tick a task that has failing or skipped tests.
+9. **Work comes from GitHub issues.** Each issue names its phase (milestone), wave and roadmap ID; the index is `docs/ISSUES.md`. Mark a row ✅ only when its last open issue closes, otherwise 🟡.
 
 **Status legend:** ⬜ todo · 🟡 in progress · ✅ done · 🔴 blocked · ⏸ deferred · ⛔ cut
 **Priority:** M = Must · S = Should · C = Could (from PRD §6)
@@ -116,6 +115,7 @@ Admit is **100% ready** when all of these are true:
 | A-2.9 | M | Council (DAO-only): `council_set_members`, `council_add_hospital` (+ `storage_deposit`), `council_remove_hospital`, `council_set_params` (no `time_scale` change), `council_mark_default` | Integration tests incl. non-DAO caller rejected | A-2.6 | ⬜ | | |
 | A-2.10 | M | `token.rs`: `ft_transfer` + `storage_deposit` promises with restoring callbacks | Failure-path test with a rejecting receiver | A-2.8 | ⬜ | | |
 | A-2.11 | M | Views: `get_pool`, `get_member`, `get_limit`, `get_pool_stats` (paginated where needed) | Integration tests | A-2.7 | ⬜ | | |
+| A-2.12 | M | Unit-test state builders (`src/test_utils.rs`: make_pool, make_member, make_guarantee, insert helpers) | Builders used by at least one unit test | A-2.1 | ⬜ |  |  |
 
 ### P3 — Guarantees
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-2.12 (new) | Created 202 GitHub issues covering every open roadmap task (milestone per phase; labels phase/area/size/wave/maintainer; index in docs/ISSUES.md). Repo interaction limited to collaborators. Header rule changed: contributions update their row + Changelog only; maintainer recomputes the header with tools/roadmap.py. Added A-2.12 (test-state builders) so wave issues stay independent. | n/a (docs and process) |
 | 2026-11-04 | A-13.10 | Repo made public at github.com/mallison031/admit on the user's explicit OK. | n/a |
 | 2026-11-04 | A-0.2, A-0.5, A-1.2, A-1.4, A-1.7 | Approved deps added (Vitest, near-contract-standards); installed cargo-near 0.22.0 + near-cli-rs; pnpm install with build-script allow-list; pinned next 16.4.4 to respect pnpm's minimum release age; ignored next-env.d.ts; docs updated (AGENTS toolchain, ARCHITECTURE §2, project_structure). | cargo near build ✅ (2 contracts) · cargo test ✅ 0 failed (scaffold tests ignored) · tsc -b ✅ · eslint ✅ · next build ✅ · pnpm -r test ✅ 0 failed (todo placeholders) |
 | 2026-11-04 | A-0.1, A-1.1, A-1.9 | Git initialised; identity recorded in AGENTS.md; CI set to manual-only; first push to private repo mallison031/admit. | n/a (no code change) |
