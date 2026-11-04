@@ -111,6 +111,7 @@ impl Contract {
         check_initials(patient_initials.as_deref()).unwrap_or_else(|e| env::panic_str(e));
 
         let now_ns = env::block_timestamp();
+        m.standing = crate::limits::derive_standing(&m, &pool.params, now_ns);
 
         if m.standing == crate::types::Standing::Default {
             env::panic_str(E11_STANDING_DEFAULT);
@@ -444,7 +445,7 @@ mod tests {
         let mut m = member(0, "alice.near".parse().unwrap());
         m.joined_at = U64(0);
         assert_eq!(
-            check_tenure(&m, &p, 1 * NS_PER_MONTH),
+            check_tenure(&m, &p, NS_PER_MONTH),
             Err(E07_TENURE_TOO_SHORT)
         );
     }
@@ -925,7 +926,7 @@ mod tests {
 
         let ctx = VMContextBuilder::new()
             .predecessor_account_id("alice.near".parse().unwrap())
-            .block_timestamp(1 * NS_PER_MONTH) // 1 < 3
+            .block_timestamp(NS_PER_MONTH) // 1 < 3
             .build();
         testing_env!(ctx);
 

@@ -145,15 +145,15 @@ Admit is **100% ready** when all of these are true:
 ### P5 — Integration test suite (Must-pass list from ESSENTIALS)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-5.1 | M | `tests/tiers_and_exposure.rs` complete | Green | P3 | ⬜ | | |
-| A-5.2 | M | `tests/eligibility.rs` complete | Green | A-3.3 | ⬜ | | |
-| A-5.3 | M | `tests/guarantee_lifecycle.rs` complete (issue → accept → claim → settle; expiry; release; top-up; transfer) | Green | P3, A-4.2 | ⬜ | | |
-| A-5.4 | M | `tests/settlement.rs` complete (dispute, adjustment, debt, death write-off) | Green | P4 | ⬜ | | |
-| A-5.5 | M | `tests/exits.rs` complete | Green | A-4.6 | ⬜ | | |
-| A-5.6 | M | `tests/access_control.rs` (every DAO/council/hospital-only method rejects others) | Green | P2–P4 | ⬜ | | |
-| A-5.7 | M | `tests/transfer_failures.rs` (rollback; hospital `storage_deposit`) | Green | A-2.10 | ⬜ | | |
-| A-5.8 | M | Real Sputnik DAO in sandbox: proposal → `council_add_hospital` executes | Green | A-0.3, A-0.4 | ⬜ | | |
-| A-5.9 | M | `cargo clippy -D warnings` + `cargo fmt` clean | `pnpm lint` (Rust part) green | P2–P4 | ⬜ | | |
+| A-5.1 | M | `tests/tiers_and_exposure.rs` complete | Green | P3 | ✅ | 2026-11-04 | 5 tests passing |
+| A-5.2 | M | `tests/eligibility.rs` complete | Green | A-3.3 | ✅ | 2026-11-04 | 7 tests passing |
+| A-5.3 | M | `tests/guarantee_lifecycle.rs` complete (issue → accept → claim → settle; expiry; release; top-up; transfer) | Green | P3, A-4.2 | ✅ | 2026-11-04 | 6 tests passing |
+| A-5.4 | M | `tests/settlement.rs` complete (dispute, adjustment, debt, death write-off) | Green | P4 | ✅ | 2026-11-04 | 6 tests passing |
+| A-5.5 | M | `tests/exits.rs` complete | Green | A-4.6 | ✅ | 2026-11-04 | 4 tests passing |
+| A-5.6 | M | `tests/access_control.rs` (every DAO/council/hospital-only method rejects others) | Green | P2–P4 | ✅ | 2026-11-04 | 4 tests passing |
+| A-5.7 | M | `tests/transfer_failures.rs` (rollback; hospital `storage_deposit`) | Green | A-2.10 | ✅ | 2026-11-04 | 3 tests passing |
+| A-5.8 | M | Real Sputnik DAO in sandbox: proposal → `council_add_hospital` executes | Green | A-0.3, A-0.4 | ✅ | 2026-11-04 | 1 test passing with real sputnikdao2.wasm |
+| A-5.9 | M | `cargo clippy -D warnings` + `cargo fmt` clean | `pnpm lint` (Rust part) green | P2–P4 | ✅ | 2026-11-04 | clean fmt and clippy |
 
 ### P6 — Testnet deployment & DAO
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-5.1, A-5.2, A-5.3, A-5.4, A-5.5, A-5.6, A-5.7, A-5.8, A-5.9 | P5 Wave 1: full integration test suite completed across 8 test suites (36 integration tests + 2 smoke tests) with real Sputnik DAO v2 integration, clean clippy and rustfmt. | 168 tests (130 unit + 38 integration) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-4.2, A-4.6, A-2.10 | P4 Wave 2: settle with adjustments/undisputed execution, execute_exit with exposure check, and rollback callbacks (on_hospital_paid, on_exit_refunded). | 9 new unit tests (130 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-4.1, A-4.2, A-4.3, A-4.4, A-4.5, A-4.6 | P4 Wave 1: member_dispute, settlement_split, derive_standing, report_death, council_write_off, exit_refund, and request_exit. | 16 new unit tests (121 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-3.1, A-3.4, A-3.10 | P3 Wave 2 & 3: request_guarantee Instant/Council tiers with delegate check, and hospital_transfer with partial claim. | 10 new unit tests (105 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
