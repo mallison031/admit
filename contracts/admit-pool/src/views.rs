@@ -12,8 +12,60 @@ impl Contract {
     }
 
     pub fn get_pool_stats(&self, pool_id: PoolId) -> PoolStats {
-        let _ = pool_id;
-        todo!("A-2.11")
+        let pool = self
+            .pools
+            .get(&pool_id)
+            .cloned()
+            .unwrap_or_else(|| near_sdk::env::panic_str(crate::errors::E01_POOL_NOT_FOUND));
+
+        let exposure_bps = pool
+            .reserved
+            .0
+            .saturating_mul(10_000)
+            .checked_div(pool.balance.0)
+            .unwrap_or(0)
+            .min(10_000) as u16;
+
+        let member_count = self
+            .member_index
+            .get(&pool_id)
+            .map(|idx| idx.len() as u64)
+            .unwrap_or(0);
+
+        let mut issued = 0u64;
+        let mut settled = 0u64;
+        for (_, g) in self.guarantees.iter() {
+            if g.pool_id == pool_id {
+                match g.status {
+                    crate::types::GStatus::Issued => issued += 1,
+                    crate::types::GStatus::Settled => settled += 1,
+                    _ => {}
+                }
+            }
+        }
+
+        let mut defaults = 0u64;
+        if let Some(members) = self.member_index.get(&pool_id) {
+            for acc in members {
+                if let Some(m) = self.members.get(&(pool_id, acc.clone())) {
+                    if m.standing == crate::types::Standing::Default {
+                        defaults += 1;
+                    }
+                }
+            }
+        }
+
+        PoolStats {
+            pool_id,
+            balance: pool.balance,
+            reserved: pool.reserved,
+            exposure_bps,
+            written_off: pool.written_off,
+            members: member_count,
+            issued,
+            settled,
+            defaults,
+        }
     }
 
     pub fn get_member(&self, pool_id: PoolId, account: AccountId) -> Option<Member> {
@@ -62,7 +114,46 @@ impl Contract {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::{insert_member, member};
+    use crate::test_utils::{
+        guarantee, insert_guarantee, insert_member, insert_pool, member, pool,
+    };
+    use near_sdk::json_types::U128;
+
+    #[test]
+    fn pool_stats_counts() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.balance = U128(10_000);
+        p.reserved = U128(2_500);
+        p.written_off = U128(100);
+        insert_pool(&mut contract, p);
+
+        let mut m1 = member(0, "alice.near".parse().unwrap());
+        m1.standing = crate::types::Standing::Default;
+        insert_member(&mut contract, m1);
+
+        let m2 = member(0, "bob.near".parse().unwrap());
+        insert_member(&mut contract, m2);
+
+        let mut g1 = guarantee(0, crate::types::GStatus::Issued);
+        g1.pool_id = 0;
+        insert_guarantee(&mut contract, g1);
+
+        let mut g2 = guarantee(1, crate::types::GStatus::Settled);
+        g2.pool_id = 0;
+        insert_guarantee(&mut contract, g2);
+
+        let stats = contract.get_pool_stats(0);
+        assert_eq!(stats.pool_id, 0);
+        assert_eq!(stats.balance.0, 10_000);
+        assert_eq!(stats.reserved.0, 2_500);
+        assert_eq!(stats.exposure_bps, 2_500);
+        assert_eq!(stats.written_off.0, 100);
+        assert_eq!(stats.members, 2);
+        assert_eq!(stats.issued, 1);
+        assert_eq!(stats.settled, 1);
+        assert_eq!(stats.defaults, 1);
+    }
 
     #[test]
     fn get_pool_returns_none_for_unknown() {

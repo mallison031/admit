@@ -107,14 +107,14 @@ Admit is **100% ready** when all of these are true:
 | A-2.1 | M | `types.rs`: all types from ARCHITECTURE §4 | Compiles; JSON shapes documented in core `types.ts` later | A-1.4 | ✅ | 2026-11-04 | all §4 types + Tier, FtMessage, PoolStats, LimitView; JSON uses U64 for timestamps |
 | A-2.2 | M | `errors.rs` (coded errors), `events.rs` (NEP-297 helper + all §7 events) | Unit test: event JSON matches NEP-297 format | A-2.1 | ✅ | 2026-11-04 | NEP-297 emit helper + emit_writes_nep297_json unit test |
 | A-2.3 | M | `time.rs` (`time_scale` helpers) | Unit tests incl. boundary at month edges | A-2.1 | ✅ | 2026-11-04 | scaled + months_between with 4 unit tests |
-| A-2.4 | M | `limits.rs` pure functions: `tenure_months`, `good_months`, `raw_limit`, `limit` (Good/Late/Default), `exposure_ok`, `tier` | Unit tests for every branch, named after the rule | A-2.3 | 🟡 | | raw_limit, exposure_ok, tier done with 7 tests; tenure_months, good_months, limit in Wave 2/3 |
+| A-2.4 | M | `limits.rs` pure functions: `tenure_months`, `good_months`, `raw_limit`, `limit` (Good/Late/Default), `exposure_ok`, `tier` | Unit tests for every branch, named after the rule | A-2.3 | 🟡 | | raw_limit, exposure_ok, tier, tenure_months, good_months done with 10 tests; limit in Wave 3 |
 | A-2.5 | M | `access.rs` role guards | Unit tests | A-2.1 | ✅ | 2026-11-04 | assert_dao, assert_council, assert_hospital, assert_member_or_delegate with 8 tests |
-| A-2.6 | M | `create_pool` (validates params; `time_scale` immutable) | Integration test | A-2.1–A-2.5, A-1.6 | 🟡 | | validate_params implemented with 7 tests; create_pool in Wave 2 |
-| A-2.7 | M | Members: `join`, `add_delegate`, `remove_delegate` | Integration tests | A-2.6 | ⬜ | | |
-| A-2.8 | M | `ft_on_transfer` dispatch: `contribute`, `repay`, `topup`; rejects other tokens | Integration tests | A-2.7 | 🟡 | | parse_ft_message helper with 4 tests; dispatch in Wave 2/3 |
-| A-2.9 | M | Council (DAO-only): `council_set_members`, `council_add_hospital` (+ `storage_deposit`), `council_remove_hospital`, `council_set_params` (no `time_scale` change), `council_mark_default` | Integration tests incl. non-DAO caller rejected | A-2.6 | ⬜ | | |
-| A-2.10 | M | `token.rs`: `ft_transfer` + `storage_deposit` promises with restoring callbacks | Failure-path test with a rejecting receiver | A-2.8 | 🟡 | | ft_transfer and storage_deposit promises with unit tests; callbacks in later waves |
-| A-2.11 | M | Views: `get_pool`, `get_member`, `get_limit`, `get_pool_stats` (paginated where needed) | Integration tests | A-2.7 | 🟡 | | get_pool, get_member, list_members with 3 tests; stats and limit in Wave 2/3 |
+| A-2.6 | M | `create_pool` (validates params; `time_scale` immutable) | Integration test | A-2.1–A-2.5, A-1.6 | ✅ | 2026-11-04 | validate_params and create_pool implemented with storage deposit check and PoolCreated event |
+| A-2.7 | M | Members: `join`, `add_delegate`, `remove_delegate` | Integration tests | A-2.6 | ✅ | 2026-11-04 | join, add_delegate, remove_delegate implemented with 6 tests |
+| A-2.8 | M | `ft_on_transfer` dispatch: `contribute`, `repay`, `topup`; rejects other tokens | Integration tests | A-2.7 | 🟡 | | parse_ft_message helper + internal_contribute/topup done; dispatch in Wave 3 |
+| A-2.9 | M | Council (DAO-only): `council_set_members`, `council_add_hospital` (+ `storage_deposit`), `council_remove_hospital`, `council_set_params` (no `time_scale` change), `council_mark_default` | Integration tests incl. non-DAO caller rejected | A-2.6 | ✅ | 2026-11-04 | council_set_members, council_add_hospital, council_remove_hospital, council_set_params, council_mark_default with 10 tests |
+| A-2.10 | M | `token.rs`: `ft_transfer` + `storage_deposit` promises with restoring callbacks | Failure-path test with a rejecting receiver | A-2.8 | 🟡 | | ft_transfer and storage_deposit promises + on_storage_registered callback; failure callbacks in later waves |
+| A-2.11 | M | Views: `get_pool`, `get_member`, `get_limit`, `get_pool_stats` (paginated where needed) | Integration tests | A-2.7 | 🟡 | | get_pool, get_member, list_members, get_pool_stats done with 4 tests; get_limit in Wave 3 |
 | A-2.12 | M | Unit-test state builders (`src/test_utils.rs`: make_pool, make_member, make_guarantee, insert helpers) | Builders used by at least one unit test | A-2.1 | ✅ | 2026-11-04 | params, pool, member, guarantee builders and inserters in src/test_utils.rs |
 
 ### P3 — Guarantees
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-2.4, A-2.6, A-2.7, A-2.8, A-2.9, A-2.10, A-2.11 | P2 Wave 2: create_pool, member join/delegates/internal contributions, council management methods, tenure/good_months limits, get_pool_stats. | 22 new unit tests (59 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-2.2, A-2.3, A-2.4, A-2.5, A-2.6, A-2.8, A-2.10, A-2.11, A-2.12 | P2 Wave 1: state builders, NEP-297 events, time scaling, pure limits (raw_limit, exposure_ok, tier), access guards, validate_params, parse_ft_message, token promises, views (get_pool, get_member, list_members). | 37 unit tests ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-1.9 | First CI runs green on GitHub (runs 41797073885, 41797447043). | CI ✅ lint · build · 2 smoke + 3 mock-ft tests |
 | 2026-11-04 | A-0.8 | Created testnet root `admit-hack-6711fd.testnet` via the faucet (10 NEAR; one faucet grant) and sub-accounts pool (3), tusdc (1.5), relay (1), council1–3, hospital1–2, member1–3 (0.3 each). Root keeps ~2 NEAR for fees. Added COUNCIL/HOSPITAL/MEMBER_ACCOUNTS to .env.example. | view-account-summary ✅ |

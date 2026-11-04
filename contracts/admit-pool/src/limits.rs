@@ -5,14 +5,18 @@ use crate::types::{Member, Pool, PoolParams, Standing, Tier};
 
 /// Scaled whole months since `member.joined_at`.
 pub fn tenure_months(member: &Member, params: &PoolParams, now_ns: u64) -> u64 {
-    let _ = (member, params, now_ns);
-    todo!("A-2.4")
+    crate::time::months_between(member.joined_at.0, now_ns, params.time_scale)
 }
 
 /// min(tenure_months, contributed / monthly_contribution).
 pub fn good_months(member: &Member, params: &PoolParams, now_ns: u64) -> u64 {
-    let _ = (member, params, now_ns);
-    todo!("A-2.4")
+    let tenure = tenure_months(member, params, now_ns);
+    let paid_months = member
+        .contributed
+        .0
+        .checked_div(params.monthly_contribution.0)
+        .unwrap_or(0) as u64;
+    tenure.min(paid_months)
 }
 
 /// min(max_limit, base_limit + limit_per_month × good_months).
@@ -68,8 +72,42 @@ pub fn derive_standing(member: &Member, params: &PoolParams, now_ns: u64) -> Sta
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::{params, pool};
-    use near_sdk::json_types::U128;
+    use crate::test_utils::{member, params, pool};
+    use crate::time::NS_PER_MONTH;
+    use near_sdk::json_types::{U128, U64};
+
+    #[test]
+    fn tenure_counts_scaled_months() {
+        let p = params();
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(1_000);
+        let now = 1_000 + 3 * NS_PER_MONTH;
+        assert_eq!(tenure_months(&m, &p, now), 3);
+    }
+
+    #[test]
+    fn good_months_limited_by_payments() {
+        let mut p = params();
+        p.monthly_contribution = U128(10);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        // Tenure is 6 months, but only contributed 30 (3 months)
+        m.contributed = U128(30);
+        let now = 6 * NS_PER_MONTH;
+        assert_eq!(good_months(&m, &p, now), 3);
+    }
+
+    #[test]
+    fn good_months_limited_by_tenure() {
+        let mut p = params();
+        p.monthly_contribution = U128(10);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        // Contributed 100 (10 months), but tenure is only 2 months
+        m.contributed = U128(100);
+        let now = 2 * NS_PER_MONTH;
+        assert_eq!(good_months(&m, &p, now), 2);
+    }
 
     #[test]
     fn raw_limit_grows_per_month() {
