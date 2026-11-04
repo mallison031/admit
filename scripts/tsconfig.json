@@ -1,1 +1,1 @@
-{ "extends": "../tsconfig.base.json", "compilerOptions": { "composite": true, "outDir": "dist" }, "include": ["*.ts", "lib"], "references": [{ "path": "../packages/core" }] }
+{ "extends": "../tsconfig.base.json", "compilerOptions": { "composite": true, "outDir": "dist" }, "include": ["*.ts", "lib", "sim", "test"], "references": [{ "path": "../packages/core" }] }
