@@ -12,6 +12,7 @@
   "dependencies": {
     "@admit/core": "workspace:*",
     "@hono/node-server": "^2.1.6",
+    "borsh": "^2.0.0",
     "hono": "^4.13.16",
     "near-api-js": "^7.4.0",
     "zod": "^4.6.7"

@@ -13,4 +13,5 @@ export const Env = z.object({
 });
 export type Env = z.infer<typeof Env>;
 
-export const loadEnv = (): Env => Env.parse(process.env);
+export const loadEnv = (env: Record<string, string | undefined> = process.env): Env =>
+  Env.parse(env);
