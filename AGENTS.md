@@ -88,6 +88,7 @@ Every commit, PR or agent task that changes code, tests, config or docs **must u
 ## Secrets and keys
 - Never commit `.env`. `.env.example` is the source of truth for env vars (ARCHITECTURE §13 points to it). Keep it complete.
 - Services sign with **function-call access keys** scoped to specific methods, never full-access keys.
+  - **One approved exception (2026-11-04, ARCHITECTURE §14 B10):** the NEP-366 relayer uses a full-access key, because it sends `Delegate` actions. That key lives only on the dedicated `relay.*` account, which holds gas money only (≤ 1 NEAR). Never give any other service a full-access key, and never reuse the relayer key.
 - Never log private keys, seed phrases, API keys or JWTs.
 
 ## Definition of done
