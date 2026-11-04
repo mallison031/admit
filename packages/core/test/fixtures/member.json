@@ -1,0 +1,12 @@
+{
+  "account": "alice.testnet",
+  "pool_id": 0,
+  "joined_at": "1700000000000000000",
+  "contributed": "100000000",
+  "outstanding": "0",
+  "standing": "Good",
+  "active_guarantees": 0,
+  "last_guarantee_at": null,
+  "delegates": ["bob.testnet"],
+  "exit_requested_at": null
+}

@@ -1,0 +1,37 @@
+{
+  "id": 0,
+  "name": "Health Pool",
+  "dao": "dao.testnet",
+  "token": "token.testnet",
+  "params": {
+    "monthly_contribution": "10000000",
+    "min_tenure_months": 0,
+    "base_limit": "50000000",
+    "limit_per_month": "25000000",
+    "max_limit": "500000000",
+    "late_limit_bps": 5000,
+    "max_exposure_bps": 8000,
+    "max_active_per_member": 2,
+    "cooldown": "86400000000000",
+    "guarantee_ttl": "86400000000000",
+    "dispute_window": "172800000000000",
+    "pool_covered_bps": 0,
+    "cover_on_death": true,
+    "council_tier_multiplier": 3,
+    "exit_lock_months": 12,
+    "exit_notice": "2592000000000000",
+    "time_scale": 1
+  },
+  "council": ["council.testnet"],
+  "hospitals": [
+    {
+      "account": "hospital.testnet",
+      "name": "City Hospital",
+      "fc_public_key": "ed25519:6E8sCci9badyRkXb3JoRpAxTMwx2gnNFkUM95Sdy7qEP"
+    }
+  ],
+  "balance": "1000000000",
+  "reserved": "50000000",
+  "written_off": "0",
+  "created_at": "1700000000000000000"
+}

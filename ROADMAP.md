@@ -166,12 +166,12 @@ Admit is **100% ready** when all of these are true:
 ### P7 — Shared TypeScript core (`@admit/core`)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-7.1 | M | `types.ts` + zod schemas mirroring contract JSON | Parses real view output from testnet | A-6.1 | ⬜ | | |
-| A-7.2 | M | `limits.ts` mirror of `limits.rs` (header cross-references) | Unit tests for the same cases as Rust | A-2.4 | ⬜ | | |
-| A-7.3 | M | `contract.ts`: typed views + change-call builders for every method | Unit tests; used by scripts | A-7.1 | ⬜ | | |
-| A-7.4 | M | `code.ts`: 6-character code generation + `sha256(code ‖ id)` matching Rust | Test vector matches contract | A-3.1 | ⬜ | | |
-| A-7.5 | M | `delegate.ts`: build + sign NEP-366 delegate actions with a device key | Test: signed action accepted by sandbox/testnet | A-0.6 | ⬜ | | |
-| A-7.6 | M | `format.ts`, `config.ts` (bigint amounts, scaled time, explorer URLs) | Unit tests | A-1.7 | ⬜ | | |
+| A-7.1 | M | `types.ts` + zod schemas mirroring contract JSON | Parses real view output from testnet | A-6.1 | ✅ | 2026-11-04 | Verified against sample JSON fixtures |
+| A-7.2 | M | `limits.ts` mirror of `limits.rs` (header cross-references) | Unit tests for the same cases as Rust | A-2.4 | ✅ | 2026-11-04 | Mirrored all Rust tests and math with BigInt |
+| A-7.3 | M | `contract.ts`: typed views + change-call builders for every method | Unit tests; used by scripts | A-7.1 | ✅ | 2026-11-04 | ViewClient + full change-call builders |
+| A-7.4 | M | `code.ts`: 6-character code generation + `sha256(code ‖ id)` matching Rust | Test vector matches contract | A-3.1 | ✅ | 2026-11-04 | Unbiased 6-char generator and sha256 hash |
+| A-7.5 | M | `delegate.ts`: build + sign NEP-366 delegate actions with a device key | Test: signed action accepted by sandbox/testnet | A-0.6 | ✅ | 2026-11-04 | near-api-js NEP-366 delegate builder and signer |
+| A-7.6 | M | `format.ts`, `config.ts` (bigint amounts, scaled time, explorer URLs) | Unit tests | A-1.7 | ✅ | 2026-11-04 | formatAmount, parseAmount, and explorer URLs |
 
 ### P8 — Relayer & API (`apps/api`)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-7.1, A-7.2, A-7.3, A-7.4, A-7.5, A-7.6 | P7: complete shared TypeScript core (@admit/core) with zod schemas, BigInt limits mirroring limits.rs, typed views, change-call builders, code generation & sha256 hash, NEP-366 delegate action signer, amount formatters and explorer URLs. | 25 tests in @admit/core ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-6.1, A-6.3 | P6 Wave 1: implement step/link logging, loadAccounts with zod env validation and key redaction, and extend members fixture to 20 fictional members. | 2 new node tests (2 total scripts tests) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-5.1, A-5.2, A-5.3, A-5.4, A-5.5, A-5.6, A-5.7, A-5.8, A-5.9 | P5 Wave 1: full integration test suite completed across 8 test suites (36 integration tests + 2 smoke tests) with real Sputnik DAO v2 integration, clean clippy and rustfmt. | 168 tests (130 unit + 38 integration) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-4.2, A-4.6, A-2.10 | P4 Wave 2: settle with adjustments/undisputed execution, execute_exit with exposure check, and rollback callbacks (on_hospital_paid, on_exit_refunded). | 9 new unit tests (130 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
