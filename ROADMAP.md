@@ -201,9 +201,9 @@ Admit is **100% ready** when all of these are true:
 ### P10 — Solvency simulator
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-10.1 | S | `scripts/simulate.ts` using `@admit/core` limits (10,000 runs × 24 months; normal / bad_year / exit_wave) | Runs in < 2 min | A-7.2 | ⬜ | | |
-| A-10.2 | S | Outputs `docs/simulation/{results.csv, chart.png, summary.md}` incl. P(insolvent) and P(denied by exposure cap) | Files committed; numbers quoted in README | A-10.1 | ⬜ | | |
-| A-10.3 | S | Tune default params so P(insolvent) < 5% in `normal`; record final params | ARCHITECTURE §4 updated | A-10.2, A-0.7 | ⬜ | | |
+| A-10.1 | S | `scripts/simulate.ts` using `@admit/core` limits (10,000 runs × 24 months; normal / bad_year / exit_wave) | Runs in < 2 min | A-7.2 | ✅ | 2026-11-04 | |
+| A-10.2 | S | Outputs `docs/simulation/{results.csv, chart.png, summary.md}` incl. P(insolvent) and P(denied by exposure cap) | Files committed; numbers quoted in README | A-10.1 | ✅ | 2026-11-04 | |
+| A-10.3 | S | Tune default params so P(insolvent) < 5% in `normal`; record final params | ARCHITECTURE §4 updated | A-10.2, A-0.7 | ✅ | 2026-11-04 | |
 
 ### P11 — Demo script (PRD §8 = acceptance test)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-10.1, A-10.2, A-10.3 | P10: complete Monte Carlo solvency simulator (scripts/simulate.ts) running 10,000 runs × 24 months across normal, bad_year, and exit_wave; verified P(insolvent) = 0.00% (< 5% requirement); generated docs/simulation/{results.csv, chart.png, chart.svg, summary.md}; calibrated default parameters recorded in ARCHITECTURE §4. | 8 tests in @admit/scripts ✅ · pnpm lint ✅ · pnpm test:contract ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-8.1, A-8.2, A-8.3, A-8.4, A-8.5, A-8.6, A-8.7 | P8: complete relayer & API (apps/api) with zod env validation, exact ARCHITECTURE §9 allowlist, verifyDelegate checks, token-bucket ratelimiting, submitDelegate, POST /relay, POST /onboard/device, POST /quote, and no-secrets log verification. | 12 tests in @admit/api ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-7.1, A-7.2, A-7.3, A-7.4, A-7.5, A-7.6 | P7: complete shared TypeScript core (@admit/core) with zod schemas, BigInt limits mirroring limits.rs, typed views, change-call builders, code generation & sha256 hash, NEP-366 delegate action signer, amount formatters and explorer URLs. | 25 tests in @admit/core ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-6.1, A-6.3 | P6 Wave 1: implement step/link logging, loadAccounts with zod env validation and key redaction, and extend members fixture to 20 fictional members. | 2 new node tests (2 total scripts tests) ✅ · pnpm lint ✅ · pnpm test ✅ |

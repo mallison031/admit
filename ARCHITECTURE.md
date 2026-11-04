@@ -85,6 +85,31 @@ pub struct PoolParams {
     time_scale: u32,                   // immutable
 }
 
+### 4.1 Calibrated Default Pool Parameters (Solvency Monte Carlo calibrated)
+
+Tuned under 10,000 runs × 24-month Monte Carlo simulations (`scripts/simulate.ts`) achieving $P(\text{insolvent}) = 0.00\%$ (< 5% requirement):
+
+| Parameter | Calibrated Value | Rationale |
+|---|---|---|
+| `monthly_contribution` | `5_000_000` ($5 USDC) | Accessible recurring micro-contribution |
+| `min_tenure_months` | `1` month | Prevents immediate hit-and-run claims |
+| `base_limit` | `100_000_000` ($100 USDC) | Covers initial hospital emergency admission deposit |
+| `limit_per_month` | `25_000_000` ($25 USDC/mo) | Progressive credit limit scaling with tenure |
+| `max_limit` | `400_000_000` ($400 USDC) | Maximum single emergency cap per standard member |
+| `late_limit_bps` | `5000` (50%) | Grace penalty for 1-month overdue contributions |
+| `max_exposure_bps` | `8000` (80%) | Solvency backstop: reserved pool capital capped at 80% of balance |
+| `max_active_per_member` | `2` | Allows two concurrent active guarantees per member |
+| `cooldown` | 30 days (`2_592_000_000_000_000` ns) | Enforces recovery period between non-emergency requests |
+| `guarantee_ttl` | 7 days (`604_800_000_000_000` ns) | Unclaimed reservation timeout |
+| `dispute_window` | 14 days (`1_209_600_000_000_000` ns) | Hospital claim dispute window before settlement |
+| `pool_covered_bps` | `7000` (70%) | Mutual aid coverage: pool absorbs 70%, member repays 30% |
+| `cover_on_death` | `true` | Debt forgiveness on member demise |
+| `council_tier_multiplier` | `3` (up to $1,200) | Council approval required for catastrophic interventions |
+| `exit_lock_months` | `3` months | Staggers capital withdrawal during exit waves |
+| `exit_notice` | 30 days (`2_592_000_000_000_000` ns) | Mandatory notice before capital return |
+| `time_scale` | `1` (testnet fast-forward `1`) | Production multiplier |
+
+
 pub struct Pool {
     id: PoolId, name: String, dao: AccountId, token: AccountId,
     params: PoolParams,
