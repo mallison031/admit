@@ -134,6 +134,26 @@ pub struct Claim {
 }
 ```
 
+### Default parameters (A-0.7)
+Reported emergency deposits demanded by Nigerian private hospitals:
+
+| Amount | Case | Source |
+|---|---|---|
+| ₦50,000 | private hospital near Ring Road, before touching the patient | [Daily Trust](https://dailytrust.com/hospital-protocols-the-daily-battle-of-nigerians/) |
+| ₦70,000 | paid upfront or a signed waiver | [Daily Trust](https://dailytrust.com/hospital-protocols-the-daily-battle-of-nigerians/) |
+| ₦100,000 | cash down payment | [Context / Thomson Reuters Foundation](https://www.context.news/money-power-people/chaos-for-patients-hospitals-as-nigerias-currency-crisis-bites) |
+| ₦500,000 | Kemi, pregnant, died waiting (Apr 2025) | [Sahara Reporters](https://saharareporters.com/2025/04/03/no-money-no-treatment-how-upfront-deposits-nigerian-hospitals-cost-lives-daniel-okonkwo), [Development Diaries](https://developmentdiaries.com/n500000-bill-hospital-must-be-held-accountable) |
+
+At ₦1,329/$ (CBN NFEM, 1 Sep 2026, the latest official figure found; [Channels TV](https://www.channelstv.com/2026/06/03/naira-to-dollar-exchange-rate-today-june-3-2026/) reports the June range), that is about **$38–$376**. Proposed defaults (tUSDC/USDC, 6 decimals; the simulator, A-10.3, tunes them):
+
+| Param | Value | Raw (6 dp) | Why |
+|---|---|---|---|
+| `monthly_contribution` | 5 | `5000000` | affordable for the target groups |
+| `base_limit` | 100 | `100000000` | covers the common ₦50k–₦100k deposits from month 3 |
+| `limit_per_month` | 25 | `25000000` | reaches 250 after 6 good months |
+| `max_limit` | 400 | `400000000` | covers the ₦500k case (≈ $376) |
+| `council_tier_multiplier` | 3 | — | one council member can approve up to 3× the limit |
+
 ### Derived (pure functions, unit-tested; ported to TS for the simulator)
 - `tenure_months = scaled(now − joined_at) / MONTH`
 - `good_months = min(tenure_months, contributed / monthly_contribution)` (both required)
