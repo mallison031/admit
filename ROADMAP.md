@@ -158,9 +158,9 @@ Admit is **100% ready** when all of these are true:
 ### P6 — Testnet deployment & DAO
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-6.1 | M | `scripts/deploy-testnet.ts`: build, deploy mock-ft + admit-pool, init | Explorer links printed; idempotent re-run | P5, A-0.8 | ⬜ | | |
+| A-6.1 | M | `scripts/deploy-testnet.ts`: build, deploy mock-ft + admit-pool, init | Explorer links printed; idempotent re-run | P5, A-0.8 | 🟡 | | log.ts and accounts.ts implemented with tests |
 | A-6.2 | M | Create the council Sputnik DAO on testnet (fixed weight policy) | DAO account recorded in `.env.example` comment + README | A-0.3, A-6.1 | ⬜ | | |
-| A-6.3 | M | `scripts/seed.ts`: pool, 20 members, 6 scaled months, council list, 2 hospitals via DAO proposals, delegate keys | `pnpm seed` exits 0 on a clean deploy | A-6.2 | ⬜ | | |
+| A-6.3 | M | `scripts/seed.ts`: pool, 20 members, 6 scaled months, council list, 2 hospitals via DAO proposals, delegate keys | `pnpm seed` exits 0 on a clean deploy | A-6.2 | 🟡 | | members.json extended to 20 fictional members |
 | A-6.4 | M | Hospital + delegate function-call keys created and scoped to allow-listed methods | Keys verified with `near-cli-rs` view-access-key | A-6.3 | ⬜ | | |
 
 ### P7 — Shared TypeScript core (`@admit/core`)
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-6.1, A-6.3 | P6 Wave 1: implement step/link logging, loadAccounts with zod env validation and key redaction, and extend members fixture to 20 fictional members. | 2 new node tests (2 total scripts tests) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-5.1, A-5.2, A-5.3, A-5.4, A-5.5, A-5.6, A-5.7, A-5.8, A-5.9 | P5 Wave 1: full integration test suite completed across 8 test suites (36 integration tests + 2 smoke tests) with real Sputnik DAO v2 integration, clean clippy and rustfmt. | 168 tests (130 unit + 38 integration) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-4.2, A-4.6, A-2.10 | P4 Wave 2: settle with adjustments/undisputed execution, execute_exit with exposure check, and rollback callbacks (on_hospital_paid, on_exit_refunded). | 9 new unit tests (130 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-4.1, A-4.2, A-4.3, A-4.4, A-4.5, A-4.6 | P4 Wave 1: member_dispute, settlement_split, derive_standing, report_death, council_write_off, exit_refund, and request_exit. | 16 new unit tests (121 total) ✅ · pnpm lint ✅ · pnpm test ✅ |

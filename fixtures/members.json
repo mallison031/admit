@@ -3,6 +3,23 @@
   "members": [
     { "label": "Ngozi Demo", "months_paid": 6, "delegates": 1 },
     { "label": "Tunde Sample", "months_paid": 6, "delegates": 0 },
-    { "label": "New Member Demo", "months_paid": 0, "delegates": 0 }
+    { "label": "New Member Demo", "months_paid": 0, "delegates": 0 },
+    { "label": "Amina Fictional", "months_paid": 5, "delegates": 2 },
+    { "label": "Emeka Mock", "months_paid": 4, "delegates": 1 },
+    { "label": "Fatima Synthetic", "months_paid": 3, "delegates": 0 },
+    { "label": "Chidi Test", "months_paid": 6, "delegates": 1 },
+    { "label": "Zainab Pretend", "months_paid": 2, "delegates": 1 },
+    { "label": "Kelechi Dummy", "months_paid": 5, "delegates": 0 },
+    { "label": "Halima Placeholder", "months_paid": 1, "delegates": 0 },
+    { "label": "Babajide Simulation", "months_paid": 6, "delegates": 2 },
+    { "label": "Funke Prototype", "months_paid": 4, "delegates": 1 },
+    { "label": "Damilola Sandbox", "months_paid": 3, "delegates": 2 },
+    { "label": "Ibrahim Imaginary", "months_paid": 5, "delegates": 0 },
+    { "label": "Yemi Virtual", "months_paid": 2, "delegates": 0 },
+    { "label": "Chioma Toy", "months_paid": 6, "delegates": 1 },
+    { "label": "Olumide Model", "months_paid": 1, "delegates": 1 },
+    { "label": "Folake Staging", "months_paid": 4, "delegates": 0 },
+    { "label": "Adeola Example", "months_paid": 3, "delegates": 1 },
+    { "label": "Suleiman Specimen", "months_paid": 6, "delegates": 0 }
   ]
 }
