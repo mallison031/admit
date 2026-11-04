@@ -75,8 +75,11 @@ impl Contract {
         pool_id: PoolId,
         account: AccountId,
     ) {
-        let _ = (result, pool_id, account);
-        todo!("A-2.10: on failure remove the hospital again")
+        if result.is_err() {
+            if let Some(pool) = self.pools.get_mut(&pool_id) {
+                pool.hospitals.retain(|h| h.account != account);
+            }
+        }
     }
 }
 

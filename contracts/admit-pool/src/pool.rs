@@ -1,9 +1,10 @@
 //! Pool creation. (A-2.6)
 
-use near_sdk::{near, require, AccountId};
+use near_sdk::json_types::{U128, U64};
+use near_sdk::{env, near, require, AccountId};
 
-use crate::errors::E22_INVALID_PARAMS;
-use crate::types::{PoolId, PoolParams};
+use crate::errors::{E22_INVALID_PARAMS, E30_INSUFFICIENT_DEPOSIT};
+use crate::types::{Pool, PoolId, PoolParams};
 use crate::{Contract, ContractExt};
 
 pub(crate) fn validate_params(p: &PoolParams) {
@@ -28,8 +29,44 @@ impl Contract {
         params: PoolParams,
     ) -> PoolId {
         validate_params(&params);
-        let _ = (name, dao, token);
-        todo!("A-2.6")
+        let initial_storage = env::storage_usage();
+
+        let id = self.next_pool_id;
+        self.next_pool_id = self
+            .next_pool_id
+            .checked_add(1)
+            .expect("overflow next_pool_id");
+
+        let pool = Pool {
+            id,
+            name,
+            dao: dao.clone(),
+            token: token.clone(),
+            params,
+            council: vec![],
+            hospitals: vec![],
+            balance: U128(0),
+            reserved: U128(0),
+            written_off: U128(0),
+            created_at: U64(env::block_timestamp()),
+        };
+        self.pools.insert(id, pool);
+
+        let final_storage = env::storage_usage();
+        let storage_used = final_storage.saturating_sub(initial_storage);
+        let required_cost = env::storage_byte_cost().saturating_mul(storage_used as u128);
+        require!(
+            env::attached_deposit() >= required_cost,
+            E30_INSUFFICIENT_DEPOSIT
+        );
+
+        crate::events::emit(crate::events::AdmitEvent::PoolCreated {
+            pool_id: id,
+            dao,
+            token,
+        });
+
+        id
     }
 }
 
@@ -92,5 +129,31 @@ mod tests {
         let mut p = params();
         p.council_tier_multiplier = 0;
         validate_params(&p);
+    }
+
+    #[test]
+    fn create_pool_stores_pool_and_increments_id() {
+        let mut contract = Contract::new(None);
+        let p = params();
+        let id0 = contract.create_pool(
+            "Pool 0".to_string(),
+            "dao.near".parse().unwrap(),
+            "usdc.near".parse().unwrap(),
+            p.clone(),
+        );
+        assert_eq!(id0, 0);
+        assert_eq!(contract.next_pool_id, 1);
+        let stored = contract.get_pool(0).expect("pool exists");
+        assert_eq!(stored.name, "Pool 0");
+        assert_eq!(stored.dao.as_str(), "dao.near");
+
+        let id1 = contract.create_pool(
+            "Pool 1".to_string(),
+            "dao.near".parse().unwrap(),
+            "usdc.near".parse().unwrap(),
+            p,
+        );
+        assert_eq!(id1, 1);
+        assert_eq!(contract.next_pool_id, 2);
     }
 }
