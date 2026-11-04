@@ -5,9 +5,11 @@ use near_sdk::json_types::U128;
 use near_sdk::{env, near, require, AccountId, Promise};
 
 use crate::access::assert_dao;
-use crate::errors::{E01_POOL_NOT_FOUND, E21_TIME_SCALE_IMMUTABLE, E24_MEMBER_NOT_FOUND};
+use crate::errors::{
+    E01_POOL_NOT_FOUND, E21_TIME_SCALE_IMMUTABLE, E23_GUARANTEE_NOT_FOUND, E24_MEMBER_NOT_FOUND,
+};
 use crate::pool::validate_params;
-use crate::types::{GuaranteeId, Hospital, PoolId, PoolParams, Standing};
+use crate::types::{GStatus, GuaranteeId, Hospital, PoolId, PoolParams, Standing};
 use crate::{Contract, ContractExt};
 
 #[near]
@@ -83,8 +85,48 @@ impl Contract {
     }
 
     pub fn council_write_off(&mut self, guarantee_id: GuaranteeId, amount: U128, reason: String) {
-        let _ = (guarantee_id, amount, reason);
-        todo!("A-4.5")
+        let mut guarantee = self
+            .guarantees
+            .get(&guarantee_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E23_GUARANTEE_NOT_FOUND));
+        let mut pool = self
+            .pools
+            .get(&guarantee.pool_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+        assert_dao(&pool);
+
+        let key = (guarantee.pool_id, guarantee.member.clone());
+        let mut member = self
+            .members
+            .get(&key)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E24_MEMBER_NOT_FOUND));
+
+        let to_write_off = amount.0.min(member.outstanding.0);
+        member.outstanding.0 = member.outstanding.0.saturating_sub(to_write_off);
+        pool.written_off.0 = pool.written_off.0.saturating_add(to_write_off);
+
+        if member.outstanding.0 == 0 && member.standing == Standing::Late {
+            member.standing = Standing::Good;
+            crate::events::emit(crate::events::AdmitEvent::StandingChanged {
+                pool_id: pool.id,
+                member: member.account.clone(),
+                standing: Standing::Good,
+            });
+        }
+
+        guarantee.status = GStatus::WrittenOff;
+        self.guarantees.insert(guarantee_id, guarantee);
+        self.members.insert(key, member);
+        self.pools.insert(pool.id, pool);
+
+        crate::events::emit(crate::events::AdmitEvent::DebtWrittenOff {
+            guarantee_id,
+            amount: U128(to_write_off),
+            reason,
+        });
     }
 
     pub fn council_mark_default(&mut self, pool_id: PoolId, member: AccountId) {
@@ -115,7 +157,9 @@ impl Contract {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::{insert_member, insert_pool, member, pool};
+    use crate::test_utils::{
+        guarantee, insert_guarantee, insert_member, insert_pool, member, pool,
+    };
     use near_sdk::test_utils::VMContextBuilder;
     use near_sdk::testing_env;
 
@@ -275,5 +319,47 @@ mod tests {
                 fc_public_key: pk,
             },
         );
+    }
+
+    #[test]
+    fn write_off_reduces_debt() {
+        let mut contract = Contract::new(None);
+        insert_pool(&mut contract, pool(0));
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.outstanding = U128(100_000_000);
+        m.standing = Standing::Late;
+        insert_member(&mut contract, m);
+
+        let g = guarantee(0, GStatus::Settled);
+        insert_guarantee(&mut contract, g);
+
+        set_predecessor("dao.near");
+        contract.council_write_off(0, U128(60_000_000), "hardship relief".to_string());
+
+        let updated_m = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(updated_m.outstanding.0, 40_000_000);
+        // Still late since outstanding > 0
+        assert_eq!(updated_m.standing, Standing::Late);
+
+        let updated_p = contract.get_pool(0).unwrap();
+        assert_eq!(updated_p.written_off.0, 60_000_000);
+
+        let updated_g = contract.get_guarantee(0).unwrap();
+        assert_eq!(updated_g.status, GStatus::WrittenOff);
+    }
+
+    #[test]
+    #[should_panic(expected = "E02_NOT_DAO")]
+    fn write_off_rejects_non_dao() {
+        let mut contract = Contract::new(None);
+        insert_pool(&mut contract, pool(0));
+        insert_member(&mut contract, member(0, "alice.near".parse().unwrap()));
+        insert_guarantee(&mut contract, guarantee(0, GStatus::Settled));
+
+        set_predecessor("stranger.near");
+        contract.council_write_off(0, U128(50_000_000), "fraud".to_string());
     }
 }

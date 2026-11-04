@@ -84,8 +84,21 @@ pub fn tier(amount: u128, limit: u128, params: &PoolParams) -> Tier {
 
 /// Standing derived from contributions vs schedule (Late after one missed period).
 pub fn derive_standing(member: &Member, params: &PoolParams, now_ns: u64) -> Standing {
-    let _ = (member, params, now_ns);
-    todo!("A-4.4")
+    if member.standing == Standing::Default {
+        return Standing::Default;
+    }
+    let tenure = tenure_months(member, params, now_ns);
+    let paid_months = member
+        .contributed
+        .0
+        .checked_div(params.monthly_contribution.0)
+        .unwrap_or(0) as u64;
+
+    if tenure > paid_months {
+        Standing::Late
+    } else {
+        Standing::Good
+    }
 }
 
 #[cfg(test)]
@@ -250,5 +263,33 @@ mod tests {
         // If debt exceeds raw limit, floors at 0
         m.outstanding = U128(150);
         assert_eq!(limit(&m, &p, 0, now), 0);
+    }
+
+    #[test]
+    fn standing_late_after_missed_period() {
+        let mut p = params();
+        p.monthly_contribution = U128(10_000_000);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        // Tenure is 2 months, but only contributed for 1 month
+        m.contributed = U128(10_000_000);
+        let now = 2 * NS_PER_MONTH;
+        assert_eq!(derive_standing(&m, &p, now), Standing::Late);
+    }
+
+    #[test]
+    fn standing_good_when_paid() {
+        let mut p = params();
+        p.monthly_contribution = U128(10_000_000);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        // Tenure is 2 months, contributed for 2 months
+        m.contributed = U128(20_000_000);
+        let now = 2 * NS_PER_MONTH;
+        assert_eq!(derive_standing(&m, &p, now), Standing::Good);
+
+        // Default standing remains Default
+        m.standing = Standing::Default;
+        assert_eq!(derive_standing(&m, &p, now), Standing::Default);
     }
 }

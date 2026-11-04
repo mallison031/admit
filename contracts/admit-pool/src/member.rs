@@ -3,9 +3,17 @@
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{env, near, require, AccountId};
 
-use crate::errors::{E01_POOL_NOT_FOUND, E24_MEMBER_NOT_FOUND, E28_ALREADY_MEMBER};
+use crate::errors::{
+    E01_POOL_NOT_FOUND, E18_EXIT_LOCKED, E24_MEMBER_NOT_FOUND, E28_ALREADY_MEMBER,
+};
+use crate::limits;
 use crate::types::{Member, PoolId, Standing};
 use crate::{Contract, ContractExt};
+
+/// Refund = contributed − outstanding (saturating at 0). (A-4.6)
+pub fn exit_refund(contributed: u128, outstanding: u128) -> u128 {
+    contributed.saturating_sub(outstanding)
+}
 
 #[near]
 impl Contract {
@@ -71,8 +79,33 @@ impl Contract {
 
     /// Allowed after `exit_lock_months` (E18).
     pub fn request_exit(&mut self, pool_id: PoolId) {
-        let _ = pool_id;
-        todo!("A-4.6")
+        let caller = env::predecessor_account_id();
+        let pool = self
+            .pools
+            .get(&pool_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+        let key = (pool_id, caller.clone());
+        let mut member = self
+            .members
+            .get(&key)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E24_MEMBER_NOT_FOUND));
+
+        let now = env::block_timestamp();
+        let tenure = limits::tenure_months(&member, &pool.params, now);
+        require!(
+            tenure >= pool.params.exit_lock_months as u64,
+            E18_EXIT_LOCKED
+        );
+
+        member.exit_requested_at = Some(U64(now));
+        self.members.insert(key, member);
+
+        crate::events::emit(crate::events::AdmitEvent::ExitRequested {
+            pool_id,
+            member: caller,
+        });
     }
 
     /// Anyone, after `exit_notice` (E19). Refund = contributed − outstanding, subject to exposure cap.
@@ -151,6 +184,11 @@ impl Contract {
 
         if m.outstanding.0 == 0 && m.standing == Standing::Late {
             m.standing = Standing::Good;
+            crate::events::emit(crate::events::AdmitEvent::StandingChanged {
+                pool_id,
+                member: member.clone(),
+                standing: Standing::Good,
+            });
         }
 
         self.members.insert(key, m);
@@ -356,5 +394,67 @@ mod tests {
             .get_member(0, "alice.near".parse().unwrap())
             .unwrap();
         assert_eq!(updated.outstanding.0, 0);
+    }
+
+    #[test]
+    fn exit_refund_with_no_debt() {
+        assert_eq!(exit_refund(100, 0), 100);
+    }
+
+    #[test]
+    fn exit_refund_reduced_by_debt() {
+        assert_eq!(exit_refund(100, 30), 70);
+    }
+
+    #[test]
+    fn exit_refund_debt_exceeds_contributions() {
+        assert_eq!(exit_refund(100, 150), 0);
+    }
+
+    #[test]
+    fn request_exit_after_lock() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.params.exit_lock_months = 12;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(1_000);
+        insert_member(&mut contract, m);
+
+        let now = 1_000 + 12 * crate::time::NS_PER_MONTH;
+        testing_env!(VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .block_timestamp(now)
+            .build());
+
+        contract.request_exit(0);
+
+        let updated = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(updated.exit_requested_at, Some(U64(now)));
+    }
+
+    #[test]
+    #[should_panic(expected = "E18_EXIT_LOCKED")]
+    fn request_exit_before_lock_fails() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.params.exit_lock_months = 12;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(1_000);
+        insert_member(&mut contract, m);
+
+        // Only 5 months passed
+        let now = 1_000 + 5 * crate::time::NS_PER_MONTH;
+        testing_env!(VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .block_timestamp(now)
+            .build());
+
+        contract.request_exit(0);
     }
 }

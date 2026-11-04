@@ -135,12 +135,12 @@ Admit is **100% ready** when all of these are true:
 ### P4 — Settlement, debt, exits
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-4.1 | M | `member_dispute` within window → `Disputed` | Test incl. after-window rejection | A-3.7 | ⬜ | | |
-| A-4.2 | M | `settle`: anyone after window if undisputed; council early or with `adjustment` + reason; pays hospital; frees reservation; adds debt `paid × (1 − pool_covered_bps)` | Tests for each path | A-4.1, A-2.10 | ⬜ | | |
-| A-4.3 | M | Debt and repayment: `repay` reduces `outstanding`; limit recovers; Late → Good when settled | Tests | A-4.2 | ⬜ | | |
-| A-4.4 | M | Standing: Late after one missed contribution period (grace), Default via council | Tests | A-2.9, A-4.3 | ⬜ | | |
-| A-4.5 | M | `report_death` (cover_on_death) and `council_write_off` → `written_off` updated, debt cleared | Tests | A-4.2 | ⬜ | | |
-| A-4.6 | M | Exits: `request_exit` (after lock), `execute_exit` (after notice), refund = contributed − debt, subject to exposure (else queued) | Tests incl. blocked-before-lock | A-4.3 | ⬜ | | |
+| A-4.1 | M | `member_dispute` within window → `Disputed` | Test incl. after-window rejection | A-3.7 | ✅ | 2026-11-04 | member_dispute implemented with window check and event emission |
+| A-4.2 | M | `settle`: anyone after window if undisputed; council early or with `adjustment` + reason; pays hospital; frees reservation; adds debt `paid × (1 − pool_covered_bps)` | Tests for each path | A-4.1, A-2.10 | 🟡 | | settlement_split pure math implemented; settle method in Wave 2 |
+| A-4.3 | M | Debt and repayment: `repay` reduces `outstanding`; limit recovers; Late → Good when settled | Tests | A-4.2 | ✅ | 2026-11-04 | internal_repay reduces debt and restores Good standing |
+| A-4.4 | M | Standing: Late after one missed contribution period (grace), Default via council | Tests | A-2.9, A-4.3 | ✅ | 2026-11-04 | derive_standing implemented with 2 tests |
+| A-4.5 | M | `report_death` (cover_on_death) and `council_write_off` → `written_off` updated, debt cleared | Tests | A-4.2 | ✅ | 2026-11-04 | report_death and council_write_off implemented with tests |
+| A-4.6 | M | Exits: `request_exit` (after lock), `execute_exit` (after notice), refund = contributed − debt, subject to exposure (else queued) | Tests incl. blocked-before-lock | A-4.3 | 🟡 | | request_exit and exit_refund implemented; execute_exit in Wave 2 |
 
 ### P5 — Integration test suite (Must-pass list from ESSENTIALS)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-4.1, A-4.2, A-4.3, A-4.4, A-4.5, A-4.6 | P4 Wave 1: member_dispute, settlement_split, derive_standing, report_death, council_write_off, exit_refund, and request_exit. | 16 new unit tests (121 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-3.1, A-3.4, A-3.10 | P3 Wave 2 & 3: request_guarantee Instant/Council tiers with delegate check, and hospital_transfer with partial claim. | 10 new unit tests (105 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-3.1, A-3.2, A-3.3, A-3.5, A-3.6, A-3.7, A-3.8, A-3.9, A-3.11 | P3 Wave 1: guarantee eligibility helpers, council approve/reject, expire, hospital accept/claim/release, request_topup, get/list_guarantees views. | 26 new unit tests (95 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-2.4, A-2.8, A-2.11 | P2 Wave 3: limits::limit (Good/Late/Default/debt/reservation), views::get_limit with eligibility checks, ft_on_transfer dispatch and token verification. | 10 new unit tests (69 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
