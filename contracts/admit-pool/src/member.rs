@@ -1,12 +1,14 @@
 //! Members: join, delegates, contributions, repayment, exits. (A-2.7, A-2.8, A-4.3, A-4.6)
 
 use near_sdk::json_types::{U128, U64};
-use near_sdk::{env, near, require, AccountId};
+use near_sdk::{env, near, require, AccountId, Promise};
 
 use crate::errors::{
-    E01_POOL_NOT_FOUND, E18_EXIT_LOCKED, E24_MEMBER_NOT_FOUND, E28_ALREADY_MEMBER,
+    E01_POOL_NOT_FOUND, E13_EXPOSURE_CAP, E18_EXIT_LOCKED, E19_EXIT_NOTICE, E24_MEMBER_NOT_FOUND,
+    E28_ALREADY_MEMBER,
 };
 use crate::limits;
+use crate::time;
 use crate::types::{Member, PoolId, Standing};
 use crate::{Contract, ContractExt};
 
@@ -109,9 +111,54 @@ impl Contract {
     }
 
     /// Anyone, after `exit_notice` (E19). Refund = contributed − outstanding, subject to exposure cap.
-    pub fn execute_exit(&mut self, pool_id: PoolId, member: AccountId) {
-        let _ = (pool_id, member);
-        todo!("A-4.6")
+    pub fn execute_exit(&mut self, pool_id: PoolId, member: AccountId) -> Promise {
+        let mut pool = self
+            .pools
+            .get(&pool_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+
+        let key = (pool_id, member.clone());
+        let member_record = self
+            .members
+            .get(&key)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E24_MEMBER_NOT_FOUND));
+
+        let exit_requested_at = member_record
+            .exit_requested_at
+            .unwrap_or_else(|| env::panic_str(E19_EXIT_NOTICE))
+            .0;
+        let notice_duration = time::scaled(pool.params.exit_notice.0, pool.params.time_scale);
+        let eligible_at = exit_requested_at.saturating_add(notice_duration);
+        require!(env::block_timestamp() >= eligible_at, E19_EXIT_NOTICE);
+
+        let refund = exit_refund(member_record.contributed.0, member_record.outstanding.0);
+
+        let new_balance = pool.balance.0.saturating_sub(refund);
+        let cap = new_balance
+            .saturating_mul(pool.params.max_exposure_bps as u128)
+            .checked_div(10_000)
+            .unwrap_or(0);
+        require!(pool.reserved.0 <= cap, E13_EXPOSURE_CAP);
+
+        pool.balance.0 = new_balance;
+        self.pools.insert(pool_id, pool.clone());
+        self.members.remove(&key);
+
+        crate::events::emit(crate::events::AdmitEvent::ExitExecuted {
+            pool_id,
+            member: member.clone(),
+            refund: U128(refund),
+        });
+
+        self.ft_transfer(pool.token, member, U128(refund)).then(
+            Self::ext(env::current_account_id()).on_exit_refunded(
+                pool_id,
+                member_record,
+                U128(refund),
+            ),
+        )
     }
 }
 
@@ -456,5 +503,102 @@ mod tests {
             .build());
 
         contract.request_exit(0);
+    }
+
+    #[test]
+    fn execute_exit_after_notice_happy_path() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        let notice = p.params.exit_notice.0;
+        p.balance = U128(1_000_000_000);
+        p.reserved = U128(0);
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.contributed = U128(120_000_000);
+        m.outstanding = U128(20_000_000);
+        m.exit_requested_at = Some(U64(1_000));
+        insert_member(&mut contract, m);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id("stranger.near".parse().unwrap())
+            .block_timestamp(1_000 + notice + 10)
+            .build());
+
+        let _promise = contract.execute_exit(0, "alice.near".parse().unwrap());
+
+        // Member is removed
+        assert!(contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .is_none());
+
+        // Balance reduced by refund (120 - 20 = 100)
+        let updated_p = contract.get_pool(0).unwrap();
+        assert_eq!(updated_p.balance.0, 900_000_000);
+    }
+
+    #[test]
+    #[should_panic(expected = "E19_EXIT_NOTICE")]
+    fn execute_exit_before_notice_fails() {
+        let mut contract = Contract::new(None);
+        insert_pool(&mut contract, pool(0));
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.exit_requested_at = Some(U64(1_000));
+        insert_member(&mut contract, m);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id("stranger.near".parse().unwrap())
+            .block_timestamp(1_000 + 100)
+            .build());
+
+        let _ = contract.execute_exit(0, "alice.near".parse().unwrap());
+    }
+
+    #[test]
+    #[should_panic(expected = "E19_EXIT_NOTICE")]
+    fn execute_exit_without_request_fails() {
+        let mut contract = Contract::new(None);
+        insert_pool(&mut contract, pool(0));
+        insert_member(&mut contract, member(0, "alice.near".parse().unwrap()));
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id("stranger.near".parse().unwrap())
+            .block_timestamp(100_000)
+            .build());
+
+        let _ = contract.execute_exit(0, "alice.near".parse().unwrap());
+    }
+
+    #[test]
+    #[should_panic(expected = "E13_EXPOSURE_CAP")]
+    fn execute_exit_exposure_cap_blocks() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        let notice = p.params.exit_notice.0;
+        // Balance 100M, max_exposure_bps = 8000 (80%).
+        // Reserved is 75M.
+        // If member refund is 10M, new balance is 90M, cap = 90M * 80% = 72M.
+        // 75M > 72M -> exposure cap exceeded!
+        p.balance = U128(100_000_000);
+        p.reserved = U128(75_000_000);
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.contributed = U128(10_000_000);
+        m.outstanding = U128(0);
+        m.exit_requested_at = Some(U64(1_000));
+        insert_member(&mut contract, m);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id("stranger.near".parse().unwrap())
+            .block_timestamp(1_000 + notice + 10)
+            .build());
+
+        let _ = contract.execute_exit(0, "alice.near".parse().unwrap());
     }
 }

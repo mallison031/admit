@@ -4,7 +4,7 @@
 use near_sdk::json_types::U128;
 use near_sdk::{ext_contract, near, AccountId, Gas, NearToken, Promise, PromiseError};
 
-use crate::types::{GuaranteeId, PoolId};
+use crate::types::{GStatus, GuaranteeId, Member, PoolId};
 use crate::{Contract, ContractExt};
 
 pub const FT_TRANSFER_GAS: Gas = Gas::from_tgas(10);
@@ -21,8 +21,7 @@ pub trait ExtStorage {
     fn storage_deposit(&mut self, account_id: Option<AccountId>, registration_only: Option<bool>);
 }
 
-// Used by settle and exits (A-2.10, A-4.2, A-4.6). Remove the allow once wired.
-#[allow(dead_code)]
+// Used by settle and exits (A-2.10, A-4.2, A-4.6).
 impl Contract {
     pub(crate) fn ft_transfer(
         &self,
@@ -52,8 +51,42 @@ impl Contract {
         guarantee_id: GuaranteeId,
         amount: U128,
     ) {
-        let _ = (result, guarantee_id, amount);
-        todo!("A-2.10: on failure restore status + reservation")
+        if result.is_err() {
+            if let Some(mut guarantee) = self.guarantees.get(&guarantee_id).cloned() {
+                if let Some(mut pool) = self.pools.get(&guarantee.pool_id).cloned() {
+                    pool.balance.0 = pool.balance.0.saturating_add(amount.0);
+                    pool.reserved.0 = pool.reserved.0.saturating_add(guarantee.amount.0);
+
+                    let member_key = (guarantee.pool_id, guarantee.member.clone());
+                    if let Some(mut member) = self.members.get(&member_key).cloned() {
+                        let debt_added = amount
+                            .0
+                            .saturating_mul(10_000 - pool.params.pool_covered_bps as u128)
+                            / 10_000;
+                        member.outstanding.0 = member.outstanding.0.saturating_sub(debt_added);
+                        member.active_guarantees = member.active_guarantees.saturating_add(1);
+                        self.members.insert(member_key, member);
+                    }
+
+                    let was_disputed = guarantee
+                        .claim
+                        .as_ref()
+                        .map(|c| c.dispute.is_some())
+                        .unwrap_or(false);
+                    guarantee.status = if was_disputed {
+                        GStatus::Disputed
+                    } else {
+                        GStatus::Claimed
+                    };
+                    if let Some(claim) = guarantee.claim.as_mut() {
+                        claim.paid = U128(0);
+                    }
+
+                    self.guarantees.insert(guarantee_id, guarantee);
+                    self.pools.insert(pool.id, pool);
+                }
+            }
+        }
     }
 
     #[private]
@@ -61,11 +94,17 @@ impl Contract {
         &mut self,
         #[callback_result] result: Result<(), PromiseError>,
         pool_id: PoolId,
-        member: AccountId,
+        member: Member,
         amount: U128,
     ) {
-        let _ = (result, pool_id, member, amount);
-        todo!("A-2.10: on failure restore member + balance")
+        if result.is_err() {
+            if let Some(mut pool) = self.pools.get(&pool_id).cloned() {
+                pool.balance.0 = pool.balance.0.saturating_add(amount.0);
+                self.pools.insert(pool_id, pool);
+            }
+            let key = (pool_id, member.account.clone());
+            self.members.insert(key, member);
+        }
     }
 
     #[private]
