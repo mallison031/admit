@@ -6,10 +6,10 @@
 | | |
 |---|---|
 | **Last updated** | 2026-11-04 |
-| **Current phase** | P3 — Guarantees (requests, council tier, lifecycle, top-ups, expiry) |
-| **Next task** | P3 Wave 2 (request_guarantee, hospital_transfer) |
-| **Must progress** | 37 / 105 Must tasks done (35%) |
-| **Overall progress** | 38 / 114 tasks done (33%) — 105 Must · 6 Should · 3 Could |
+| **Current phase** | P4 — Settlement, debt, exits |
+| **Next task** | P4 Wave 1 (#63, #64, #65, #66, #67) |
+| **Must progress** | 40 / 105 Must tasks done (38%) |
+| **Overall progress** | 41 / 114 tasks done (36%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
