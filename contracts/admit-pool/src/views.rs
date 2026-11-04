@@ -173,8 +173,7 @@ impl Contract {
 
     /// Used by the QR page (`/g/[id]`).
     pub fn get_guarantee(&self, guarantee_id: GuaranteeId) -> Option<Guarantee> {
-        let _ = guarantee_id;
-        todo!("A-3.11")
+        self.guarantees.get(&guarantee_id).cloned()
     }
 
     pub fn list_guarantees(
@@ -183,8 +182,15 @@ impl Contract {
         from_index: Option<u64>,
         limit: Option<u64>,
     ) -> Vec<Guarantee> {
-        let _ = (pool_id, from_index, limit);
-        todo!("A-3.11")
+        let from = from_index.unwrap_or(0) as usize;
+        let limit = limit.unwrap_or(50).min(100) as usize;
+        self.guarantees
+            .iter()
+            .filter(|(_, g)| g.pool_id == pool_id)
+            .map(|(_, g)| g.clone())
+            .skip(from)
+            .take(limit)
+            .collect()
     }
 }
 
@@ -322,5 +328,39 @@ mod tests {
         let view3 = contract.get_limit(0, "alice.near".parse().unwrap());
         assert!(!view3.eligible);
         assert_eq!(view3.blocked_by, Some("E11_STANDING_DEFAULT".to_string()));
+    }
+
+    #[test]
+    fn get_guarantee_returns_inserted() {
+        let mut contract = Contract::new(None);
+        let g = guarantee(42, crate::types::GStatus::Issued);
+        insert_guarantee(&mut contract, g.clone());
+
+        assert_eq!(contract.get_guarantee(42), Some(g));
+        assert_eq!(contract.get_guarantee(999), None);
+    }
+
+    #[test]
+    fn list_guarantees_paginates() {
+        let mut contract = Contract::new(None);
+        for i in 0..5 {
+            let mut g = guarantee(i, crate::types::GStatus::Issued);
+            g.pool_id = 0;
+            insert_guarantee(&mut contract, g);
+        }
+
+        let page1 = contract.list_guarantees(0, Some(0), Some(2));
+        assert_eq!(page1.len(), 2);
+        assert_eq!(page1[0].id, 0);
+        assert_eq!(page1[1].id, 1);
+
+        let page2 = contract.list_guarantees(0, Some(2), Some(2));
+        assert_eq!(page2.len(), 2);
+        assert_eq!(page2[0].id, 2);
+        assert_eq!(page2[1].id, 3);
+
+        let page3 = contract.list_guarantees(0, Some(4), Some(2));
+        assert_eq!(page3.len(), 1);
+        assert_eq!(page3[0].id, 4);
     }
 }
