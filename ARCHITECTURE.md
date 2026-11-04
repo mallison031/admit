@@ -50,7 +50,7 @@
 | Contract | Rust, `near-sdk` 5.30, `cargo-near` |
 | Tests | `near-workspaces` 0.24, unit tests; TS packages use Node's built-in `node:test` via `tsx` (no extra dependency) |
 | Approved extra deps (2026-11-04) | `near-contract-standards` 5.30 (mock-ft NEP-141/145) · Vitest 5.1 (web tests) |
-| Token | Mock NEP-141 `tusdc.<you>.testnet` (with NEP-145 storage); mainnet USDC **VERIFY** id |
+| Token | Mock NEP-141 `tusdc.<you>.testnet` (with NEP-145 storage); mainnet native USDC: `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` (NEP-141, 6 decimals; per Circle's USDC-on-NEAR page). Not the bridged `a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.factory.bridge.near` (USDC.e). |
 | Council | Sputnik DAO v2. Factory: `sputnik-v2.testnet` (testnet), `sputnik-dao.near` (mainnet), both confirmed on-chain with near-cli on 2026-11-04. DAO contract version 2.0.0. Fixed-weight policy: `{"weight_kind":"RoleWeight","quorum":"0","threshold":"3"}`. `threshold` is an untagged enum, so a string is a fixed weight (`"3"`) and a pair is a ratio (`[1,2]`, which resolves to `num × total / denom + 1`). Source: `sputnikdao2/src/policy.rs` (`WeightOrRatio`). |
 | Relayer | NEP-366 delegate actions; `admit-api` relayer account with allow-list `admit-pool` methods only (reference: `pagoda-relayer-rs` or a small TS relayer with `near-api-js` `signedDelegate`) **VERIFY** current relayer tooling |
 | Versions (checked 2026-11-04) | near-sdk 5.30.0 · near-workspaces 0.24.0 · Next 16.4 · React 19.3 · Hono 4.13 · near-api-js 7.4 · zod 4.6 · Tailwind 4.3 · wallet-selector 10.1 · TypeScript 5.9 (typescript-eslint doesn't support TS 7 yet) |

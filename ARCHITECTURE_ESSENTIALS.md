@@ -80,5 +80,5 @@
 
 ## Verify
 - ~~Sputnik factory names~~ (verified 2026-11-04: `sputnik-v2.testnet`, `sputnik-dao.near`).
-- The mainnet USDC id.
+- ~~The mainnet USDC id~~ (recorded 2026-11-04).
 - Current NEP-366 relayer tooling.
