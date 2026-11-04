@@ -82,7 +82,7 @@ Admit is **100% ready** when all of these are true:
 | A-0.3 | M | Verify Sputnik DAO v2 factory accounts (testnet/mainnet) and the fixed-weight vote policy JSON | Answer recorded in ARCHITECTURE §2; VERIFY tag removed | — | ✅ | 2026-11-04 | sputnik-v2.testnet + sputnik-dao.near confirmed on-chain; fixed weight = `"3"` |
 | A-0.4 | M | Pin the Sputnik DAO v2 wasm (source commit + sha256) | `contracts/admit-pool/res/` has the wasm + `SPUTNIK_VERSION.txt` | A-1.4 | ✅ | 2026-11-04 | live testnet DAO code v2.0.0; sha256 matches chain |
 | A-0.5 | M | Verify `cargo-near` build subcommand and `near-workspaces` version for near-sdk 5.x | Commands recorded in project_structure §4 | — | ✅ | 2026-11-04 | cargo-near 0.22.0: `cargo near build non-reproducible-wasm` confirmed; near-cli-rs installed |
-| A-0.6 | M | Verify current NEP-366 relayer approach (library vs hand-rolled with `near-api-js` `signedDelegate`) | Decision recorded in ARCHITECTURE §2 + §14 | — | ⬜ | | |
+| A-0.6 | M | Verify current NEP-366 relayer approach (library vs hand-rolled with `near-api-js` `signedDelegate`) | Decision recorded in ARCHITECTURE §2 + §14 | — | 🟡 |  | proposal in ARCHITECTURE §2: TS relayer on near-api-js 7.4; needs decision on a full-access relayer key |
 | A-0.7 | M | Research real emergency deposit sizes (Nigeria) with sources, and set default `base_limit` / `limit_per_month` / `max_limit` | Values + citations in ARCHITECTURE §4 and README draft | — | ✅ | 2026-11-04 | 4 sourced deposit figures (₦50k–₦500k ≈ $38–$376); defaults proposed in ARCHITECTURE §4 |
 | A-0.8 | M | Create and fund testnet accounts: deployer, `admit`, `tusdc`, `relay`, 3 council members, 2 hospitals, demo members | Accounts listed in `.env` (not committed); faucet limits noted | — | ⬜ | | |
 | A-0.9 | S | Look up mainnet USDC token id on NEAR (docs only, no transaction) | Recorded in ARCHITECTURE §2 | — | ✅ | 2026-11-04 | native USDC id + decimals recorded; bridged USDC.e flagged |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-0.6 | Proposed the relayer approach (near-api-js 7.4, no extra library) and flagged that the relayer likely needs a full-access key; awaiting maintainer decision. | n/a (docs) |
 | 2026-11-04 | A-0.7 | Recorded sourced emergency-deposit sizes and proposed default limits (base 100, +25/month, max 400, contribution 5). | n/a (docs) |
 | 2026-11-04 | A-0.9 | Recorded native USDC on NEAR (Circle) and warned against bridged USDC.e. | n/a (docs) |
 | 2026-11-04 | A-0.4 | Pinned sputnikdao2.wasm (v2.0.0, downloaded from the testnet factory's latest DAO; sha256 matches on-chain checksum). | `shasum -a 256` ✅ matches chain |
