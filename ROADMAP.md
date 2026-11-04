@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
 | **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
-| **Must progress** | 11 / 104 Must tasks done (11%) |
-| **Overall progress** | 11 / 113 tasks done (10%) — 104 Must · 6 Should · 3 Could |
+| **Must progress** | 12 / 104 Must tasks done (12%) |
+| **Overall progress** | 12 / 113 tasks done (11%) — 104 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -235,7 +235,7 @@ Admit is **100% ready** when all of these are true:
 | A-13.7 | M | Screenshots + simulation chart in README | Present | A-13.6, A-10.2 | ⬜ | | |
 | A-13.8 | M | Demo video (2am story, ≤ 2 min) | File ready for user review | A-11.8, A-13.6 | ⬜ | | |
 | A-13.9 | M | X post draft (built at NEAR HACKATHON, @NEARProtocol, #NEARHackathon, video) | Draft approved by user; **posted only with explicit OK** | A-13.8 | ⬜ | | |
-| A-13.10 | M | Make repo public | **Only with explicit OK** | A-14.4 | ⬜ | | |
+| A-13.10 | M | Make repo public | **Only with explicit OK** | A-14.4 | ✅ | 2026-11-04 | made public on user's explicit OK (2026-11-04); secrets scan clean |
 | A-13.11 | M | Submit hackathon form (repo URL, post URL, wallet, description 20–2,000 chars) | **Only with explicit OK**; submissions can't be edited | A-13.9, A-13.10 | ⬜ | | Target 14 Nov 18:00 UTC |
 
 ### P14 — Final QA
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-13.10 | Repo made public at github.com/mallison031/admit on the user's explicit OK. | n/a |
 | 2026-11-04 | A-0.2, A-0.5, A-1.2, A-1.4, A-1.7 | Approved deps added (Vitest, near-contract-standards); installed cargo-near 0.22.0 + near-cli-rs; pnpm install with build-script allow-list; pinned next 16.4.4 to respect pnpm's minimum release age; ignored next-env.d.ts; docs updated (AGENTS toolchain, ARCHITECTURE §2, project_structure). | cargo near build ✅ (2 contracts) · cargo test ✅ 0 failed (scaffold tests ignored) · tsc -b ✅ · eslint ✅ · next build ✅ · pnpm -r test ✅ 0 failed (todo placeholders) |
 | 2026-11-04 | A-0.1, A-1.1, A-1.9 | Git initialised; identity recorded in AGENTS.md; CI set to manual-only; first push to private repo mallison031/admit. | n/a (no code change) |
 | 2026-11-04 | A-1.1–A-1.10, A-2.1, A-0.5 | Scaffolded the full repo per project_structure.md: root config, Rust workspace, admit-pool data model + method stubs, mock-ft stub, 36 named integration-test skeletons, /core (zod mirror of the data model), api, web, scripts, fixtures. Docs synced to current versions (Next 16, near-sdk 5.30, zod 4, near-api-js 7) and to `.env.example`. | `cargo check --target wasm32-unknown-unknown` ✅ (warnings: unused stubs); TS not installed yet |
