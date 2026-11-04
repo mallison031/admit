@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
 | **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
-| **Must progress** | 17 / 105 Must tasks done (16%) |
-| **Overall progress** | 18 / 114 tasks done (16%) — 105 Must · 6 Should · 3 Could |
+| **Must progress** | 18 / 105 Must tasks done (17%) |
+| **Overall progress** | 19 / 114 tasks done (17%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -84,7 +84,7 @@ Admit is **100% ready** when all of these are true:
 | A-0.5 | M | Verify `cargo-near` build subcommand and `near-workspaces` version for near-sdk 5.x | Commands recorded in project_structure §4 | — | ✅ | 2026-11-04 | cargo-near 0.22.0: `cargo near build non-reproducible-wasm` confirmed; near-cli-rs installed |
 | A-0.6 | M | Verify current NEP-366 relayer approach (library vs hand-rolled with `near-api-js` `signedDelegate`) | Decision recorded in ARCHITECTURE §2 + §14 | — | 🟡 |  | proposal in ARCHITECTURE §2: TS relayer on near-api-js 7.4; needs decision on a full-access relayer key |
 | A-0.7 | M | Research real emergency deposit sizes (Nigeria) with sources, and set default `base_limit` / `limit_per_month` / `max_limit` | Values + citations in ARCHITECTURE §4 and README draft | — | ✅ | 2026-11-04 | 4 sourced deposit figures (₦50k–₦500k ≈ $38–$376); defaults proposed in ARCHITECTURE §4 |
-| A-0.8 | M | Create and fund testnet accounts: deployer, `admit`, `tusdc`, `relay`, 3 council members, 2 hospitals, demo members | Accounts listed in `.env` (not committed); faucet limits noted | — | ⬜ | | |
+| A-0.8 | M | Create and fund testnet accounts: deployer, `admit`, `tusdc`, `relay`, 3 council members, 2 hospitals, demo members | Accounts listed in `.env` (not committed); faucet limits noted | — | ✅ | 2026-11-04 | root admit-hack-6711fd.testnet (faucet, 10 NEAR) + 11 role sub-accounts; keys in ~/.near-credentials + local .env |
 | A-0.9 | S | Look up mainnet USDC token id on NEAR (docs only, no transaction) | Recorded in ARCHITECTURE §2 | — | ✅ | 2026-11-04 | native USDC id + decimals recorded; bridged USDC.e flagged |
 
 ### P1 — Scaffolding
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-0.8 | Created testnet root `admit-hack-6711fd.testnet` via the faucet (10 NEAR; one faucet grant) and sub-accounts pool (3), tusdc (1.5), relay (1), council1–3, hospital1–2, member1–3 (0.3 each). Root keeps ~2 NEAR for fees. Added COUNCIL/HOSPITAL/MEMBER_ACCOUNTS to .env.example. | view-account-summary ✅ |
 | 2026-11-04 | A-1.9 | CI runs lint + all tests on push/PR; installs cargo-near 0.22.0 from the checksum-verified release. Fixed `pnpm lint` (clippy now targets wasm32; allowed dead code on two stub blocks until P2 wires them). | pnpm lint ✅ locally |
 | 2026-11-04 | A-1.6 | Harness now deploys mock-ft too, registers the pool with the token, and adds user, register_storage, mint and balance helpers. | cargo test -p admit-pool --test smoke ✅ 2 passed |
 | 2026-11-04 | A-1.6 | Sandbox harness: setup() deploys admit-pool and calls new(); smoke test added. | cargo test -p admit-pool --test smoke ✅ 1 passed |
