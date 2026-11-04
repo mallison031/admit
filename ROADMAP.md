@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
 | **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
-| **Must progress** | 15 / 105 Must tasks done (14%) |
-| **Overall progress** | 16 / 114 tasks done (14%) — 105 Must · 6 Should · 3 Could |
+| **Must progress** | 16 / 105 Must tasks done (15%) |
+| **Overall progress** | 17 / 114 tasks done (15%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -94,7 +94,7 @@ Admit is **100% ready** when all of these are true:
 | A-1.2 | M | pnpm workspace: root `package.json` (all scripts from project_structure §4), `pnpm-workspace.yaml`, `tsconfig.base.json`, ESLint, Prettier | `pnpm install` works | A-1.1 | ✅ | 2026-11-04 | pnpm 11.17 install OK; allowBuilds = esbuild only; next pinned 16.4.4 (release-age policy) |
 | A-1.3 | M | Rust workspace: `Cargo.toml`, `rust-toolchain.toml`, `rustfmt.toml` | `cargo check --workspace` works | A-1.1 | ✅ | 2026-11-04 | cargo check --target wasm32 passes |
 | A-1.4 | M | `contracts/admit-pool` skeleton (empty contract, module files from project_structure §2.1) | `pnpm build:contract` produces wasm | A-1.3, A-0.5 | ✅ | 2026-11-04 | contract wasm builds with cargo-near |
-| A-1.5 | M | `contracts/mock-ft` (NEP-141 + NEP-145 + open `mint`) | Builds; unit test mints and transfers | A-1.3, A-0.2 | 🟡 |  | stub compiles; NEP-141/145 pending A-0.2 |
+| A-1.5 | M | `contracts/mock-ft` (NEP-141 + NEP-145 + open `mint`) | Builds; unit test mints and transfers | A-1.3, A-0.2 | ✅ | 2026-11-04 | NEP-141/145 via near-contract-standards; open mint; tUSDC 6 dp |
 | A-1.6 | M | `tests/common/mod.rs` sandbox harness (deploy pool + mock-ft + Sputnik, create accounts) | A smoke test deploys everything in sandbox | A-1.4, A-1.5, A-0.4 | 🟡 |  | harness + 36 named #[ignore] test skeletons written |
 | A-1.7 | M | `packages/core`, `apps/api`, `apps/web`, `scripts` skeletons | `pnpm build` and `pnpm -r test` pass (placeholder tests) | A-1.2 | ✅ | 2026-11-04 | tsc -b, eslint, next build, pnpm -r test all pass (tests are todo placeholders) |
 | A-1.8 | M | `.env.example` with every var from ARCHITECTURE §13 | File matches §13 exactly | A-1.2 | ✅ | 2026-11-04 | .env.example is the source of truth; ARCHITECTURE §13 points to it |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-1.5 | mock-ft implements NEP-141 + NEP-145 (near-contract-standards 5.30) with an open mint. | cargo test -p mock-ft ✅ 3 passed · wasm build ✅ · clippy ✅ |
 | 2026-11-04 | A-0.6 | Proposed the relayer approach (near-api-js 7.4, no extra library) and flagged that the relayer likely needs a full-access key; awaiting maintainer decision. | n/a (docs) |
 | 2026-11-04 | A-0.7 | Recorded sourced emergency-deposit sizes and proposed default limits (base 100, +25/month, max 400, contribution 5). | n/a (docs) |
 | 2026-11-04 | A-0.9 | Recorded native USDC on NEAR (Circle) and warned against bridged USDC.e. | n/a (docs) |
