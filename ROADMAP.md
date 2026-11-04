@@ -6,10 +6,10 @@
 | | |
 |---|---|
 | **Last updated** | 2026-11-04 |
-| **Current phase** | P5 — Integration test suite |
-| **Next task** | P5 Wave 1 (#73–#109) |
-| **Must progress** | 47 / 105 Must tasks done (45%) |
-| **Overall progress** | 48 / 114 tasks done (42%) — 105 Must · 6 Should · 3 Could |
+| **Current phase** | P6 — Testnet deployment & DAO |
+| **Next task** | P6 (#110–#116) |
+| **Must progress** | 56 / 105 Must tasks done (53%) |
+| **Overall progress** | 57 / 114 tasks done (50%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
