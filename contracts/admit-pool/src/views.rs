@@ -90,8 +90,85 @@ impl Contract {
     }
 
     pub fn get_limit(&self, pool_id: PoolId, account: AccountId) -> LimitView {
-        let _ = (pool_id, account);
-        todo!("A-2.11")
+        let pool = self
+            .pools
+            .get(&pool_id)
+            .cloned()
+            .unwrap_or_else(|| near_sdk::env::panic_str(crate::errors::E01_POOL_NOT_FOUND));
+        let member = self
+            .members
+            .get(&(pool_id, account.clone()))
+            .cloned()
+            .unwrap_or_else(|| near_sdk::env::panic_str(crate::errors::E24_MEMBER_NOT_FOUND));
+
+        let now_ns = near_sdk::env::block_timestamp();
+
+        let mut reserved_for_member = 0u128;
+        for (_, g) in self.guarantees.iter() {
+            if g.pool_id == pool_id && g.member == account {
+                match g.status {
+                    crate::types::GStatus::PendingCouncil
+                    | crate::types::GStatus::Issued
+                    | crate::types::GStatus::Accepted
+                    | crate::types::GStatus::Claimed
+                    | crate::types::GStatus::Disputed => {
+                        reserved_for_member = reserved_for_member.saturating_add(g.amount.0);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        let lim = crate::limits::limit(&member, &pool.params, reserved_for_member, now_ns);
+        let council_tier_max = lim.saturating_mul(pool.params.council_tier_multiplier as u128);
+
+        let blocked_by = Self::check_eligibility(&member, &pool.params, now_ns);
+        let eligible = blocked_by.is_none();
+
+        LimitView {
+            limit: near_sdk::json_types::U128(lim),
+            council_tier_max: near_sdk::json_types::U128(council_tier_max),
+            standing: member.standing,
+            eligible,
+            blocked_by: blocked_by.map(String::from),
+        }
+    }
+
+    pub(crate) fn check_eligibility(
+        member: &Member,
+        params: &crate::types::PoolParams,
+        now_ns: u64,
+    ) -> Option<&'static str> {
+        if member.standing == crate::types::Standing::Default {
+            return Some("E11_STANDING_DEFAULT");
+        }
+        let tenure = crate::limits::tenure_months(member, params, now_ns);
+        if tenure < params.min_tenure_months as u64 {
+            return Some("E07_TENURE_TOO_SHORT");
+        }
+        let months_paid = member
+            .contributed
+            .0
+            .checked_div(params.monthly_contribution.0)
+            .unwrap_or(0) as u64;
+        let min_paid = if member.standing == crate::types::Standing::Late {
+            tenure.saturating_sub(1)
+        } else {
+            tenure
+        };
+        if months_paid < min_paid {
+            return Some("E08_CONTRIBUTIONS_UNPAID");
+        }
+        if member.active_guarantees >= params.max_active_per_member {
+            return Some("E09_TOO_MANY_ACTIVE");
+        }
+        if let Some(last_at) = member.last_guarantee_at {
+            let cooldown_scaled = crate::time::scaled(params.cooldown.0, params.time_scale);
+            if now_ns < last_at.0.saturating_add(cooldown_scaled) {
+                return Some("E10_COOLDOWN");
+            }
+        }
+        None
     }
 
     /// Used by the QR page (`/g/[id]`).
@@ -193,5 +270,57 @@ mod tests {
         let page3 = contract.list_members(0, Some(4), Some(2));
         assert_eq!(page3.len(), 1);
         assert_eq!(page3[0].account.as_str(), "member4.near");
+    }
+
+    #[test]
+    fn get_limit_reports_blocked_by() {
+        use crate::time::NS_PER_MONTH;
+        use near_sdk::test_utils::VMContextBuilder;
+        use near_sdk::testing_env;
+
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.params.min_tenure_months = 2;
+        p.params.monthly_contribution = U128(10);
+        p.params.base_limit = U128(100);
+        p.params.limit_per_month = U128(20);
+        p.params.council_tier_multiplier = 3;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = near_sdk::json_types::U64(0);
+        m.contributed = U128(50);
+        insert_member(&mut contract, m.clone());
+
+        // Context at 1 month (less than min_tenure_months = 2)
+        let ctx = VMContextBuilder::new()
+            .block_timestamp(1 * NS_PER_MONTH)
+            .build();
+        testing_env!(ctx);
+
+        let view = contract.get_limit(0, "alice.near".parse().unwrap());
+        assert_eq!(view.limit.0, 0);
+        assert_eq!(view.council_tier_max.0, 0);
+        assert!(!view.eligible);
+        assert_eq!(view.blocked_by, Some("E07_TENURE_TOO_SHORT".to_string()));
+
+        // Advance to 2 months (tenure passes, contributed 50 >= 2*10=20)
+        let ctx = VMContextBuilder::new()
+            .block_timestamp(2 * NS_PER_MONTH)
+            .build();
+        testing_env!(ctx);
+
+        let view2 = contract.get_limit(0, "alice.near".parse().unwrap());
+        assert!(view2.eligible);
+        assert_eq!(view2.blocked_by, None);
+        assert!(view2.limit.0 > 0);
+        assert_eq!(view2.council_tier_max.0, view2.limit.0 * 3);
+
+        // Standing default blocks
+        m.standing = crate::types::Standing::Default;
+        insert_member(&mut contract, m);
+        let view3 = contract.get_limit(0, "alice.near".parse().unwrap());
+        assert!(!view3.eligible);
+        assert_eq!(view3.blocked_by, Some("E11_STANDING_DEFAULT".to_string()));
     }
 }

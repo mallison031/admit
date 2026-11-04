@@ -82,8 +82,7 @@ impl Contract {
     }
 }
 
-// Called from ft_on_transfer once dispatch is implemented (A-2.8, A-4.3). Remove the allow once wired.
-#[allow(dead_code)]
+// Called from ft_on_transfer (A-2.8, A-4.3).
 impl Contract {
     pub(crate) fn internal_contribute(
         &mut self,
@@ -132,8 +131,38 @@ impl Contract {
         member: AccountId,
         amount: U128,
     ) -> U128 {
-        let _ = (pool_id, member, amount);
-        todo!("A-4.3: reduces outstanding; refunds any excess")
+        let mut pool = self
+            .pools
+            .get(&pool_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+        let key = (pool_id, member.clone());
+        let mut m = self
+            .members
+            .get(&key)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E24_MEMBER_NOT_FOUND));
+
+        let repaid = m.outstanding.0.min(amount.0);
+        let excess = amount.0.saturating_sub(repaid);
+
+        m.outstanding.0 = m.outstanding.0.saturating_sub(repaid);
+        pool.balance.0 = pool.balance.0.saturating_add(repaid);
+
+        if m.outstanding.0 == 0 && m.standing == Standing::Late {
+            m.standing = Standing::Good;
+        }
+
+        self.members.insert(key, m);
+        self.pools.insert(pool_id, pool);
+
+        crate::events::emit(crate::events::AdmitEvent::Repayment {
+            pool_id,
+            member,
+            amount: U128(repaid),
+        });
+
+        U128(excess)
     }
 
     pub(crate) fn internal_topup(
@@ -291,5 +320,41 @@ mod tests {
 
         let new_pool = contract.get_pool(0).unwrap();
         assert_eq!(new_pool.balance.0, initial_balance + 100_000_000);
+    }
+
+    #[test]
+    fn repay_reduces_debt() {
+        let mut contract = Contract::new(None);
+        insert_pool(&mut contract, pool(0));
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.outstanding = U128(100);
+        m.standing = Standing::Late;
+        insert_member(&mut contract, m);
+
+        let unused = contract.internal_repay(0, "alice.near".parse().unwrap(), U128(100));
+        assert_eq!(unused.0, 0);
+
+        let updated = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(updated.outstanding.0, 0);
+        assert_eq!(updated.standing, Standing::Good);
+    }
+
+    #[test]
+    fn repay_refunds_excess() {
+        let mut contract = Contract::new(None);
+        insert_pool(&mut contract, pool(0));
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.outstanding = U128(40);
+        insert_member(&mut contract, m);
+
+        let unused = contract.internal_repay(0, "alice.near".parse().unwrap(), U128(100));
+        assert_eq!(unused.0, 60);
+
+        let updated = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(updated.outstanding.0, 0);
     }
 }

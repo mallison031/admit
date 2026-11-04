@@ -28,8 +28,27 @@ pub fn raw_limit(params: &PoolParams, good_months: u64) -> u128 {
 
 /// Good: raw − outstanding − reserved_for_member; Late: × late_limit_bps; Default or tenure < min: 0.
 pub fn limit(member: &Member, params: &PoolParams, reserved_for_member: u128, now_ns: u64) -> u128 {
-    let _ = (member, params, reserved_for_member, now_ns);
-    todo!("A-2.4")
+    if member.standing == Standing::Default {
+        return 0;
+    }
+    let tenure = tenure_months(member, params, now_ns);
+    if tenure < params.min_tenure_months as u64 {
+        return 0;
+    }
+    let good = good_months(member, params, now_ns);
+    let raw = raw_limit(params, good);
+    let available = raw
+        .saturating_sub(member.outstanding.0)
+        .saturating_sub(reserved_for_member);
+
+    match member.standing {
+        Standing::Good => available,
+        Standing::Late => available
+            .saturating_mul(params.late_limit_bps as u128)
+            .checked_div(10_000)
+            .unwrap_or(0),
+        Standing::Default => 0,
+    }
 }
 
 /// reserved + amount ≤ balance × max_exposure_bps / 10_000.
@@ -184,5 +203,52 @@ mod tests {
 
         // Above 300 is Rejected
         assert_eq!(tier(301, limit, &p), Tier::Rejected);
+    }
+
+    #[test]
+    fn limit_is_zero_below_min_tenure() {
+        let mut p = params();
+        p.min_tenure_months = 2;
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100_000_000);
+        // Only 1 month tenure
+        let now = 1 * NS_PER_MONTH;
+        assert_eq!(limit(&m, &p, 0, now), 0);
+    }
+
+    #[test]
+    fn late_member_gets_reduced_limit() {
+        let mut p = params();
+        p.min_tenure_months = 1;
+        p.base_limit = U128(100);
+        p.limit_per_month = U128(0);
+        p.max_limit = U128(500);
+        p.late_limit_bps = 5_000; // 50%
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        m.standing = Standing::Late;
+        let now = 2 * NS_PER_MONTH;
+        // Raw limit is 100. Late gets 100 * 50% = 50.
+        assert_eq!(limit(&m, &p, 0, now), 50);
+    }
+
+    #[test]
+    fn limit_subtracts_debt() {
+        let mut p = params();
+        p.min_tenure_months = 1;
+        p.base_limit = U128(100);
+        p.limit_per_month = U128(0);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        m.outstanding = U128(30);
+        let now = 2 * NS_PER_MONTH;
+        // Raw limit is 100 - 30 debt - 20 reserved = 50.
+        assert_eq!(limit(&m, &p, 20, now), 50);
+        // If debt exceeds raw limit, floors at 0
+        m.outstanding = U128(150);
+        assert_eq!(limit(&m, &p, 0, now), 0);
     }
 }
