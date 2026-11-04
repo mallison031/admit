@@ -187,16 +187,16 @@ Admit is **100% ready** when all of these are true:
 ### P9 — Web app (`apps/web`)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-9.1 | M | Layout, landing page, DEMO MODE banner when `time_scale ≠ 1` | Renders on mobile + desktop | A-7.6 | ⬜ | | |
-| A-9.2 | M | `lib/device-key.ts` (IndexedDB keypair) + `lib/relay.ts` | Key persists across reloads; never sent to server | A-7.5, A-8.4 | ⬜ | | |
-| A-9.3 | M | `/request`: hospital picker, amount (shows limit), submit → code + QR | Works on a phone against testnet | A-9.2 | ⬜ | | |
-| A-9.4 | M | `/g/[id]`: RPC-only status banner, amount + local estimate, expiry countdown, code check, explorer links | Works with the API turned off | A-7.3, A-7.4 | ⬜ | | |
-| A-9.5 | M | `/hospital`: accept, claim (bill hash), release, transfer | Each action succeeds via relayer | A-9.2 | ⬜ | | |
-| A-9.6 | M | `/member` (wallet): limit, debt, contribute, repay, delegate pairing QR, exit | Each action succeeds | A-7.3 | ⬜ | | |
-| A-9.7 | M | `/council` (wallet): pending approvals, disputes, settle with adjustment, report death | Each action succeeds | A-7.3 | ⬜ | | |
-| A-9.8 | M | `/pool/[id]`: balance, reserved, exposure, guarantee list, recent events | Matches chain state | A-7.3 | ⬜ | | |
-| A-9.9 | S | Component/flow tests (Vitest + Testing Library) for code check + status banner | Green | A-9.4 | ⬜ | | |
-| A-9.10 | M | Accessibility + mobile pass (tap targets, contrast, readable at 360 px) | Manual checklist in Notes | A-9.3–A-9.8 | ⬜ | | |
+| A-9.1 | M | Layout, landing page, DEMO MODE banner when `time_scale ≠ 1` | Renders on mobile + desktop | A-7.6 | ✅ | 2026-11-04 | |
+| A-9.2 | M | `lib/device-key.ts` (IndexedDB keypair) + `lib/relay.ts` | Key persists across reloads; never sent to server | A-7.5, A-8.4 | ✅ | 2026-11-04 | |
+| A-9.3 | M | `/request`: hospital picker, amount (shows limit), submit → code + QR | Works on a phone against testnet | A-9.2 | ✅ | 2026-11-04 | |
+| A-9.4 | M | `/g/[id]`: RPC-only status banner, amount + local estimate, expiry countdown, code check, explorer links | Works with the API turned off | A-7.3, A-7.4 | ✅ | 2026-11-04 | |
+| A-9.5 | M | `/hospital`: accept, claim (bill hash), release, transfer | Each action succeeds via relayer | A-9.2 | ✅ | 2026-11-04 | |
+| A-9.6 | M | `/member` (wallet): limit, debt, contribute, repay, delegate pairing QR, exit | Each action succeeds | A-7.3 | ✅ | 2026-11-04 | |
+| A-9.7 | M | `/council` (wallet): pending approvals, disputes, settle with adjustment, report death | Each action succeeds | A-7.3 | ✅ | 2026-11-04 | |
+| A-9.8 | M | `/pool/[id]`: balance, reserved, exposure, guarantee list, recent events | Matches chain state | A-7.3 | ✅ | 2026-11-04 | |
+| A-9.9 | S | Component/flow tests (Vitest + Testing Library) for code check + status banner | Green | A-9.4 | ✅ | 2026-11-04 | |
+| A-9.10 | M | Accessibility + mobile pass (tap targets, contrast, readable at 360 px) | Manual checklist in Notes | A-9.3–A-9.8 | ✅ | 2026-11-04 | |
 
 ### P10 — Solvency simulator
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-9.1, A-9.2, A-9.3, A-9.4, A-9.5, A-9.6, A-9.7, A-9.8, A-9.9, A-9.10 | P9: complete web application (apps/web) with mobile-first responsive layout, DEMO MODE banner, IndexedDB device keypair, relayer client, AmountInput, GuaranteeQr, StatusBanner, CodeCheck, Countdown, ExplorerLink, /request, /g/[id] (RPC-only offline-capable), /hospital, /member, /council, /pool/[id], a11y pass (tap targets ≥ 44px, contrast), and Vitest component test suite. | 16 tests in @admit/web ✅ · next build ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-10.1, A-10.2, A-10.3 | P10: complete Monte Carlo solvency simulator (scripts/simulate.ts) running 10,000 runs × 24 months across normal, bad_year, and exit_wave; verified P(insolvent) = 0.00% (< 5% requirement); generated docs/simulation/{results.csv, chart.png, chart.svg, summary.md}; calibrated default parameters recorded in ARCHITECTURE §4. | 8 tests in @admit/scripts ✅ · pnpm lint ✅ · pnpm test:contract ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-8.1, A-8.2, A-8.3, A-8.4, A-8.5, A-8.6, A-8.7 | P8: complete relayer & API (apps/api) with zod env validation, exact ARCHITECTURE §9 allowlist, verifyDelegate checks, token-bucket ratelimiting, submitDelegate, POST /relay, POST /onboard/device, POST /quote, and no-secrets log verification. | 12 tests in @admit/api ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-7.1, A-7.2, A-7.3, A-7.4, A-7.5, A-7.6 | P7: complete shared TypeScript core (@admit/core) with zod schemas, BigInt limits mirroring limits.rs, typed views, change-call builders, code generation & sha256 hash, NEP-366 delegate action signer, amount formatters and explorer URLs. | 25 tests in @admit/core ✅ · pnpm lint ✅ · pnpm -r test ✅ |
