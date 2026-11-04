@@ -144,7 +144,7 @@ Reported emergency deposits demanded by Nigerian private hospitals:
 | ₦100,000 | cash down payment | [Context / Thomson Reuters Foundation](https://www.context.news/money-power-people/chaos-for-patients-hospitals-as-nigerias-currency-crisis-bites) |
 | ₦500,000 | Kemi, pregnant, died waiting (Apr 2025) | [Sahara Reporters](https://saharareporters.com/2025/04/03/no-money-no-treatment-how-upfront-deposits-nigerian-hospitals-cost-lives-daniel-okonkwo), [Development Diaries](https://developmentdiaries.com/n500000-bill-hospital-must-be-held-accountable) |
 
-At ₦1,329/$ (CBN NFEM, 1 Sep 2026, the latest official figure found; [Channels TV](https://www.channelstv.com/2026/06/03/naira-to-dollar-exchange-rate-today-june-3-2026/) reports the June range), that is about **$38–$376**. Proposed defaults (tUSDC/USDC, 6 decimals; the simulator, A-10.3, tunes them):
+At ₦1,329/$ (CBN NFEM, early Sep 2026, the latest official figure found: [News Central](https://newscentraltv.com/?p=442574); June was about ₦1,360: [Channels TV](https://www.channelstv.com/2026/06/03/naira-to-dollar-exchange-rate-today-june-3-2026/)), that is about **$38–$376**. Proposed defaults (tUSDC/USDC, 6 decimals; the simulator, A-10.3, tunes them):
 
 | Param | Value | Raw (6 dp) | Why |
 |---|---|---|---|
