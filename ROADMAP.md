@@ -7,9 +7,9 @@
 |---|---|
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P2 — Contract core (data model, access, limits, views, promises) |
-| **Next task** | P2 Wave 2 (create_pool, member join/delegates, stats, council methods) |
-| **Must progress** | 23 / 105 Must tasks done (22%) |
-| **Overall progress** | 24 / 114 tasks done (21%) — 105 Must · 6 Should · 3 Could |
+| **Next task** | P2 Wave 3 (limits::limit, views::get_limit, ft_on_transfer) |
+| **Must progress** | 26 / 105 Must tasks done (25%) |
+| **Overall progress** | 27 / 114 tasks done (24%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
