@@ -95,7 +95,7 @@ Admit is **100% ready** when all of these are true:
 | A-1.3 | M | Rust workspace: `Cargo.toml`, `rust-toolchain.toml`, `rustfmt.toml` | `cargo check --workspace` works | A-1.1 | ✅ | 2026-11-04 | cargo check --target wasm32 passes |
 | A-1.4 | M | `contracts/admit-pool` skeleton (empty contract, module files from project_structure §2.1) | `pnpm build:contract` produces wasm | A-1.3, A-0.5 | ✅ | 2026-11-04 | contract wasm builds with cargo-near |
 | A-1.5 | M | `contracts/mock-ft` (NEP-141 + NEP-145 + open `mint`) | Builds; unit test mints and transfers | A-1.3, A-0.2 | ✅ | 2026-11-04 | NEP-141/145 via near-contract-standards; open mint; tUSDC 6 dp |
-| A-1.6 | M | `tests/common/mod.rs` sandbox harness (deploy pool + mock-ft + Sputnik, create accounts) | A smoke test deploys everything in sandbox | A-1.4, A-1.5, A-0.4 | 🟡 |  | harness + 36 named #[ignore] test skeletons written |
+| A-1.6 | M | `tests/common/mod.rs` sandbox harness (deploy pool + mock-ft + Sputnik, create accounts) | A smoke test deploys everything in sandbox | A-1.4, A-1.5, A-0.4 | 🟡 |  | harness deploys admit-pool + new(); mock-ft + helpers in #10 |
 | A-1.7 | M | `packages/core`, `apps/api`, `apps/web`, `scripts` skeletons | `pnpm build` and `pnpm -r test` pass (placeholder tests) | A-1.2 | ✅ | 2026-11-04 | tsc -b, eslint, next build, pnpm -r test all pass (tests are todo placeholders) |
 | A-1.8 | M | `.env.example` with every var from ARCHITECTURE §13 | File matches §13 exactly | A-1.2 | ✅ | 2026-11-04 | .env.example is the source of truth; ARCHITECTURE §13 points to it |
 | A-1.9 | M | CI: `.github/workflows/ci.yml` (lint + unit + contract tests) | CI green on first push | A-1.6, A-1.7 | 🟡 |  | ci.yml drafted; manual-only (workflow_dispatch) until lockfile + cargo-near step exist |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-1.6 | Sandbox harness: setup() deploys admit-pool and calls new(); smoke test added. | cargo test -p admit-pool --test smoke ✅ 1 passed |
 | 2026-11-04 | A-1.5 | mock-ft implements NEP-141 + NEP-145 (near-contract-standards 5.30) with an open mint. | cargo test -p mock-ft ✅ 3 passed · wasm build ✅ · clippy ✅ |
 | 2026-11-04 | A-0.6 | Proposed the relayer approach (near-api-js 7.4, no extra library) and flagged that the relayer likely needs a full-access key; awaiting maintainer decision. | n/a (docs) |
 | 2026-11-04 | A-0.7 | Recorded sourced emergency-deposit sizes and proposed default limits (base 100, +25/month, max 400, contribution 5). | n/a (docs) |
