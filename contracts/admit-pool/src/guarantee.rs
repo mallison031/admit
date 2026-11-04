@@ -4,12 +4,13 @@ use near_sdk::json_types::{U128, U64};
 use near_sdk::{env, near, AccountId};
 
 use crate::errors::{
-    E01_POOL_NOT_FOUND, E07_TENURE_TOO_SHORT, E08_CONTRIBUTIONS_UNPAID, E09_TOO_MANY_ACTIVE,
-    E10_COOLDOWN, E12_OVER_TIER, E13_EXPOSURE_CAP, E14_INVALID_STATUS, E23_GUARANTEE_NOT_FOUND,
+    E01_POOL_NOT_FOUND, E06_HOSPITAL_NOT_REGISTERED, E07_TENURE_TOO_SHORT,
+    E08_CONTRIBUTIONS_UNPAID, E09_TOO_MANY_ACTIVE, E10_COOLDOWN, E11_STANDING_DEFAULT,
+    E12_OVER_TIER, E13_EXPOSURE_CAP, E14_INVALID_STATUS, E23_GUARANTEE_NOT_FOUND,
     E24_MEMBER_NOT_FOUND, E25_INITIALS_TOO_LONG, E26_NOT_EXPIRED,
 };
 use crate::types::{
-    CryptoHash, GStatus, GuaranteeId, LocalAmount, Member, PoolId, PoolParams, Tier,
+    CryptoHash, GStatus, Guarantee, GuaranteeId, LocalAmount, Member, PoolId, PoolParams, Tier,
 };
 use crate::{Contract, ContractExt};
 
@@ -88,16 +89,121 @@ impl Contract {
         patient_initials: Option<String>,
         local: Option<LocalAmount>,
     ) -> GuaranteeId {
-        let _ = (
+        let mut pool = self
+            .pools
+            .get(&pool_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+
+        let member_key = (pool_id, member.clone());
+        let mut m = self
+            .members
+            .get(&member_key)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E24_MEMBER_NOT_FOUND));
+
+        let requested_by = crate::access::assert_member_or_delegate(&m);
+
+        if !pool.hospitals.iter().any(|h| h.account == hospital) {
+            env::panic_str(E06_HOSPITAL_NOT_REGISTERED);
+        }
+
+        check_initials(patient_initials.as_deref()).unwrap_or_else(|e| env::panic_str(e));
+
+        let now_ns = env::block_timestamp();
+
+        if m.standing == crate::types::Standing::Default {
+            env::panic_str(E11_STANDING_DEFAULT);
+        }
+        check_tenure(&m, &pool.params, now_ns).unwrap_or_else(|e| env::panic_str(e));
+        check_contributions(&m, &pool.params, now_ns).unwrap_or_else(|e| env::panic_str(e));
+        check_active_cap(&m, &pool.params).unwrap_or_else(|e| env::panic_str(e));
+        check_cooldown(&m, &pool.params, now_ns).unwrap_or_else(|e| env::panic_str(e));
+
+        let mut reserved_for_member = 0u128;
+        for (_, other_g) in self.guarantees.iter() {
+            if other_g.pool_id == pool_id && other_g.member == member {
+                match other_g.status {
+                    GStatus::PendingCouncil
+                    | GStatus::Issued
+                    | GStatus::Accepted
+                    | GStatus::Claimed
+                    | GStatus::Disputed => {
+                        reserved_for_member = reserved_for_member.saturating_add(other_g.amount.0);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        let lim = crate::limits::limit(&m, &pool.params, reserved_for_member, now_ns);
+        let tier = crate::limits::tier(amount.0, lim, &pool.params);
+        if tier == Tier::Rejected {
+            env::panic_str(E12_OVER_TIER);
+        }
+
+        let ttl_scaled = crate::time::scaled(pool.params.guarantee_ttl.0, pool.params.time_scale);
+        let guarantee_id = self.next_guarantee_id;
+        self.next_guarantee_id = self
+            .next_guarantee_id
+            .checked_add(1)
+            .expect("overflow guarantee id");
+
+        let (status, expires_at) = match tier {
+            Tier::Instant => {
+                if !crate::limits::exposure_ok(&pool, amount.0) {
+                    env::panic_str(E13_EXPOSURE_CAP);
+                }
+                pool.reserved.0 = pool
+                    .reserved
+                    .0
+                    .checked_add(amount.0)
+                    .expect("overflow pool reserved");
+                crate::events::emit(crate::events::AdmitEvent::GuaranteeIssued {
+                    guarantee_id,
+                    hospital: hospital.clone(),
+                    amount,
+                });
+                (GStatus::Issued, U64(now_ns.saturating_add(ttl_scaled)))
+            }
+            Tier::Council => {
+                crate::events::emit(crate::events::AdmitEvent::GuaranteeRequested {
+                    guarantee_id,
+                    pool_id,
+                    amount,
+                });
+                (GStatus::PendingCouncil, U64(0))
+            }
+            Tier::Rejected => unreachable!(),
+        };
+
+        m.active_guarantees = m.active_guarantees.saturating_add(1);
+        m.last_guarantee_at = Some(U64(now_ns));
+
+        let g = Guarantee {
+            id: guarantee_id,
             pool_id,
-            member,
+            member: member.clone(),
+            requested_by,
+            patient_initials,
+            code_hash,
             hospital,
             amount,
-            code_hash,
-            patient_initials,
             local,
-        );
-        todo!("A-3.1")
+            status,
+            issued_at: U64(now_ns),
+            expires_at,
+            accepted_at: None,
+            claim: None,
+            approved_by: None,
+            transferred_from: None,
+        };
+
+        self.guarantees.insert(guarantee_id, g);
+        self.members.insert(member_key, m);
+        self.pools.insert(pool_id, pool);
+
+        guarantee_id
     }
 
     /// Same tier + exposure checks on the new total.
@@ -304,7 +410,7 @@ impl Contract {
 mod tests {
     use super::*;
     use crate::test_utils::{
-        guarantee, insert_guarantee, insert_member, insert_pool, member, params, pool,
+        guarantee, hospital, insert_guarantee, insert_member, insert_pool, member, params, pool,
     };
     use crate::time::NS_PER_MONTH;
     use near_sdk::test_utils::VMContextBuilder;
@@ -624,5 +730,276 @@ mod tests {
         testing_env!(ctx);
 
         contract.request_topup(1, U128(50));
+    }
+
+    #[test]
+    fn request_guarantee_instant_tier_happy_path() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.balance = U128(100_000_000);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        p.params.base_limit = U128(100);
+        p.params.min_tenure_months = 0;
+        p.params.max_exposure_bps = 8_000;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .block_timestamp(1_000_000)
+            .build();
+        testing_env!(ctx);
+
+        let gid = contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(50),
+            [1u8; 32],
+            Some("AB".to_string()),
+            None,
+        );
+
+        assert_eq!(gid, 0);
+        let g = contract.get_guarantee(gid).unwrap();
+        assert_eq!(g.status, GStatus::Issued);
+        assert_eq!(g.amount.0, 50);
+
+        let updated_p = contract.get_pool(0).unwrap();
+        assert_eq!(updated_p.reserved.0, 50);
+
+        let updated_m = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(updated_m.active_guarantees, 1);
+        assert_eq!(updated_m.last_guarantee_at, Some(U64(1_000_000)));
+    }
+
+    #[test]
+    fn request_guarantee_council_tier_happy_path() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.balance = U128(100_000_000);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        p.params.base_limit = U128(100);
+        p.params.council_tier_multiplier = 3;
+        p.params.min_tenure_months = 0;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        let gid = contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(200), // > 100 limit, <= 300 council max
+            [1u8; 32],
+            None,
+            None,
+        );
+
+        let g = contract.get_guarantee(gid).unwrap();
+        assert_eq!(g.status, GStatus::PendingCouncil);
+        assert_eq!(g.amount.0, 200);
+
+        let updated_p = contract.get_pool(0).unwrap();
+        assert_eq!(updated_p.reserved.0, 0); // Not reserved until approved
+    }
+
+    #[test]
+    #[should_panic(expected = "E06_HOSPITAL_NOT_REGISTERED")]
+    fn request_guarantee_rejects_unregistered_hospital() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.hospitals = vec![];
+        insert_pool(&mut contract, p);
+        insert_member(&mut contract, member(0, "alice.near".parse().unwrap()));
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "fake_hospital.near".parse().unwrap(),
+            U128(50),
+            [1u8; 32],
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "E12_OVER_TIER")]
+    fn request_guarantee_rejects_over_tier() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        p.params.base_limit = U128(100);
+        p.params.council_tier_multiplier = 3;
+        p.params.min_tenure_months = 0;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(301), // > 300 council max
+            [1u8; 32],
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "E13_EXPOSURE_CAP")]
+    fn request_guarantee_rejects_over_exposure_cap() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.balance = U128(100);
+        p.params.max_exposure_bps = 5_000; // max reserved = 50
+        p.reserved = U128(40);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        p.params.base_limit = U128(100);
+        p.params.min_tenure_months = 0;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        // 40 + 20 = 60 > 50
+        contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(20),
+            [1u8; 32],
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "E07_TENURE_TOO_SHORT")]
+    fn request_guarantee_rejects_ineligible_tenure() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        p.params.min_tenure_months = 3;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("alice.near".parse().unwrap())
+            .block_timestamp(1 * NS_PER_MONTH) // 1 < 3
+            .build();
+        testing_env!(ctx);
+
+        contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(10),
+            [1u8; 32],
+            None,
+            None,
+        );
+    }
+
+    #[test]
+    fn request_guarantee_by_delegate() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.balance = U128(100_000_000);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        p.params.base_limit = U128(100);
+        p.params.min_tenure_months = 0;
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.joined_at = U64(0);
+        m.contributed = U128(100);
+        m.delegates = vec!["phone.near".parse().unwrap()];
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("phone.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        let gid = contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(50),
+            [1u8; 32],
+            None,
+            None,
+        );
+
+        let g = contract.get_guarantee(gid).unwrap();
+        assert_eq!(g.requested_by, "phone.near".parse::<AccountId>().unwrap());
+    }
+
+    #[test]
+    #[should_panic(expected = "E05_NOT_MEMBER_OR_DELEGATE")]
+    fn request_guarantee_rejects_non_delegate() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.hospitals = vec![hospital("hospital.near".parse().unwrap())];
+        insert_pool(&mut contract, p);
+
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.delegates = vec!["phone.near".parse().unwrap()];
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("stranger.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        contract.request_guarantee(
+            0,
+            "alice.near".parse().unwrap(),
+            "hospital.near".parse().unwrap(),
+            U128(50),
+            [1u8; 32],
+            None,
+            None,
+        );
     }
 }

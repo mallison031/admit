@@ -3,7 +3,9 @@
 use near_sdk::json_types::{U128, U64};
 use near_sdk::AccountId;
 
-use crate::types::{GStatus, Guarantee, GuaranteeId, Member, Pool, PoolId, PoolParams, Standing};
+use crate::types::{
+    GStatus, Guarantee, GuaranteeId, Hospital, Member, Pool, PoolId, PoolParams, Standing,
+};
 use crate::Contract;
 
 pub fn params() -> PoolParams {
@@ -44,6 +46,16 @@ pub fn pool(id: PoolId) -> Pool {
         reserved: U128(0),
         written_off: U128(0),
         created_at: U64(1_000_000_000),
+    }
+}
+
+pub fn hospital(account: AccountId) -> Hospital {
+    Hospital {
+        account,
+        name: "General Hospital".to_string(),
+        fc_public_key: "ed25519:6E8sCci9badyRkXb3JoRpAx5bMrqZgqwq86gRVCm16yE"
+            .parse()
+            .unwrap(),
     }
 }
 

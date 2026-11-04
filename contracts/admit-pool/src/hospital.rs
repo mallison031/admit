@@ -4,9 +4,10 @@ use near_sdk::json_types::{U128, U64};
 use near_sdk::{env, near, AccountId};
 
 use crate::errors::{
-    E01_POOL_NOT_FOUND, E14_INVALID_STATUS, E15_CLAIM_EXCEEDS_GUARANTEE, E23_GUARANTEE_NOT_FOUND,
+    E01_POOL_NOT_FOUND, E06_HOSPITAL_NOT_REGISTERED, E14_INVALID_STATUS,
+    E15_CLAIM_EXCEEDS_GUARANTEE, E23_GUARANTEE_NOT_FOUND,
 };
-use crate::types::{Claim, CryptoHash, GStatus, GuaranteeId};
+use crate::types::{Claim, CryptoHash, GStatus, Guarantee, GuaranteeId};
 use crate::{Contract, ContractExt};
 
 #[near]
@@ -120,8 +121,84 @@ impl Contract {
         to_hospital: AccountId,
         partial_amount: U128,
     ) -> GuaranteeId {
-        let _ = (guarantee_id, to_hospital, partial_amount);
-        todo!("A-3.10")
+        let mut g = self
+            .guarantees
+            .get(&guarantee_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E23_GUARANTEE_NOT_FOUND));
+
+        crate::access::assert_hospital(&g);
+
+        let pool = self
+            .pools
+            .get(&g.pool_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+
+        if !pool.hospitals.iter().any(|h| h.account == to_hospital) {
+            env::panic_str(E06_HOSPITAL_NOT_REGISTERED);
+        }
+
+        if g.status != GStatus::Accepted && g.status != GStatus::Issued {
+            env::panic_str(E14_INVALID_STATUS);
+        }
+
+        if partial_amount.0 >= g.amount.0 {
+            env::panic_str(E15_CLAIM_EXCEEDS_GUARANTEE);
+        }
+
+        let now_ns = env::block_timestamp();
+        let remaining_amount = g.amount.0.saturating_sub(partial_amount.0);
+
+        // Current guarantee keeps partial_amount as a claim
+        g.status = GStatus::Claimed;
+        g.amount = partial_amount;
+        g.claim = Some(Claim {
+            amount: partial_amount,
+            file_hash: [0u8; 32],
+            claimed_at: U64(now_ns),
+            dispute: None,
+            adjustment: U128(0),
+            adjustment_reason: None,
+            paid: U128(0),
+            ai_review: None,
+        });
+        self.guarantees.insert(guarantee_id, g.clone());
+
+        // New guarantee at to_hospital for the remainder
+        let new_id = self.next_guarantee_id;
+        self.next_guarantee_id = self
+            .next_guarantee_id
+            .checked_add(1)
+            .expect("overflow guarantee id");
+
+        let new_g = Guarantee {
+            id: new_id,
+            pool_id: g.pool_id,
+            member: g.member.clone(),
+            requested_by: g.requested_by.clone(),
+            patient_initials: g.patient_initials.clone(),
+            code_hash: g.code_hash,
+            hospital: to_hospital.clone(),
+            amount: U128(remaining_amount),
+            local: g.local.clone(),
+            status: GStatus::Accepted,
+            issued_at: g.issued_at,
+            expires_at: g.expires_at,
+            accepted_at: Some(U64(now_ns)),
+            claim: None,
+            approved_by: g.approved_by.clone(),
+            transferred_from: Some(guarantee_id),
+        };
+        self.guarantees.insert(new_id, new_g);
+
+        crate::events::emit(crate::events::AdmitEvent::GuaranteeTransferred {
+            from_id: guarantee_id,
+            to_id: new_id,
+            to_hospital,
+        });
+
+        new_id
     }
 }
 
@@ -129,7 +206,7 @@ impl Contract {
 mod tests {
     use super::*;
     use crate::test_utils::{
-        guarantee, insert_guarantee, insert_member, insert_pool, member, pool,
+        guarantee, hospital, insert_guarantee, insert_member, insert_pool, member, pool,
     };
     use near_sdk::test_utils::VMContextBuilder;
     use near_sdk::testing_env;
@@ -261,5 +338,61 @@ mod tests {
         testing_env!(ctx);
 
         contract.hospital_release(1);
+    }
+
+    #[test]
+    fn hospital_transfer_happy_path() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.hospitals = vec![
+            hospital("hosp1.near".parse().unwrap()),
+            hospital("hosp2.near".parse().unwrap()),
+        ];
+        insert_pool(&mut contract, p);
+
+        let mut g = guarantee(1, GStatus::Accepted);
+        g.pool_id = 0;
+        g.hospital = "hosp1.near".parse().unwrap();
+        g.amount = U128(500);
+        insert_guarantee(&mut contract, g);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("hosp1.near".parse().unwrap())
+            .block_timestamp(3_000_000)
+            .build();
+        testing_env!(ctx);
+
+        let new_id = contract.hospital_transfer(1, "hosp2.near".parse().unwrap(), U128(200));
+
+        let orig = contract.get_guarantee(1).unwrap();
+        assert_eq!(orig.status, GStatus::Claimed);
+        assert_eq!(orig.amount.0, 200);
+
+        let new_g = contract.get_guarantee(new_id).unwrap();
+        assert_eq!(new_g.status, GStatus::Accepted);
+        assert_eq!(new_g.hospital, "hosp2.near".parse::<AccountId>().unwrap());
+        assert_eq!(new_g.amount.0, 300);
+        assert_eq!(new_g.transferred_from, Some(1));
+    }
+
+    #[test]
+    #[should_panic(expected = "E06_HOSPITAL_NOT_REGISTERED")]
+    fn hospital_transfer_rejects_unregistered_hospital() {
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.hospitals = vec![hospital("hosp1.near".parse().unwrap())];
+        insert_pool(&mut contract, p);
+
+        let mut g = guarantee(1, GStatus::Accepted);
+        g.pool_id = 0;
+        g.hospital = "hosp1.near".parse().unwrap();
+        insert_guarantee(&mut contract, g);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("hosp1.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        contract.hospital_transfer(1, "unregistered.near".parse().unwrap(), U128(100));
     }
 }
