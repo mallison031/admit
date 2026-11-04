@@ -50,9 +50,9 @@
 | Contract | Rust, `near-sdk` 5.30, `cargo-near` |
 | Tests | `near-workspaces` 0.24, unit tests; TS packages use Node's built-in `node:test` via `tsx` (no extra dependency) |
 | Approved extra deps (2026-11-04) | `near-contract-standards` 5.30 (mock-ft NEP-141/145) · Vitest 5.1 (web tests) |
-| Token | Mock NEP-141 `tusdc.<you>.testnet` (with NEP-145 storage); mainnet USDC **VERIFY** id |
-| Council | Sputnik DAO v2 (factory **VERIFY**) |
-| Relayer | NEP-366 delegate actions; `admit-api` relayer account with allow-list `admit-pool` methods only (reference: `pagoda-relayer-rs` or a small TS relayer with `near-api-js` `signedDelegate`) **VERIFY** current relayer tooling |
+| Token | Mock NEP-141 `tusdc.<you>.testnet` (with NEP-145 storage); mainnet native USDC: `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` (NEP-141, 6 decimals; per Circle's USDC-on-NEAR page). Not the bridged `a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.factory.bridge.near` (USDC.e). |
+| Council | Sputnik DAO v2. Factory: `sputnik-v2.testnet` (testnet), `sputnik-dao.near` (mainnet), both confirmed on-chain with near-cli on 2026-11-04. DAO contract version 2.0.0. Fixed-weight policy: `{"weight_kind":"RoleWeight","quorum":"0","threshold":"3"}`. `threshold` is an untagged enum, so a string is a fixed weight (`"3"`) and a pair is a ratio (`[1,2]`, which resolves to `num × total / denom + 1`). Source: `sputnikdao2/src/policy.rs` (`WeightOrRatio`). |
+| Relayer | NEP-366 delegate actions. **Proposed (A-0.6, awaiting maintainer decision):** a small TS relayer in `apps/api` using near-api-js 7.4 (`buildDelegateAction` and `encodeSignedDelegate` are exported; no extra library). Devices sign the inner DelegateAction with their function-call key; the relayer wraps it in its own transaction. **Open issue:** the outer transaction carries a `Delegate` action, which function-call keys most likely can't send, so the relayer probably needs a full-access key on a dedicated, low-balance account. That needs an exception to the "function-call keys only" rule; confirm in a sandbox test (A-7.5). Refs: [NEP-366](https://github.com/near/NEPs/blob/master/neps/nep-0366.md), [NEAR relayer tutorial](https://docs.near.org/web3-apps/tutorials/meta-transactions). |
 | Versions (checked 2026-11-04) | near-sdk 5.30.0 · near-workspaces 0.24.0 · Next 16.4 · React 19.3 · Hono 4.13 · near-api-js 7.4 · zod 4.6 · Tailwind 4.3 · wallet-selector 10.1 · TypeScript 5.9 (typescript-eslint doesn't support TS 7 yet) |
 | Frontend | Next.js 16, TypeScript, Tailwind, `near-api-js`, `qrcode`; wallet-selector only for council/members who have wallets |
 | Backend | Node 22 + Hono (`admit-api`): relayer, (stretch) AI bill check, quote proxy |
@@ -133,6 +133,26 @@ pub struct Claim {
     ai_review: Option<AiReview>,       // stretch, advisory
 }
 ```
+
+### Default parameters (A-0.7)
+Reported emergency deposits demanded by Nigerian private hospitals:
+
+| Amount | Case | Source |
+|---|---|---|
+| ₦50,000 | private hospital near Ring Road, before touching the patient | [Daily Trust](https://dailytrust.com/hospital-protocols-the-daily-battle-of-nigerians/) |
+| ₦70,000 | paid upfront or a signed waiver | [Daily Trust](https://dailytrust.com/hospital-protocols-the-daily-battle-of-nigerians/) |
+| ₦100,000 | cash down payment | [Context / Thomson Reuters Foundation](https://www.context.news/money-power-people/chaos-for-patients-hospitals-as-nigerias-currency-crisis-bites) |
+| ₦500,000 | Kemi, pregnant, died waiting (Apr 2025) | [Sahara Reporters](https://saharareporters.com/2025/04/03/no-money-no-treatment-how-upfront-deposits-nigerian-hospitals-cost-lives-daniel-okonkwo), [Development Diaries](https://developmentdiaries.com/n500000-bill-hospital-must-be-held-accountable) |
+
+At ₦1,329/$ (CBN NFEM, early Sep 2026, the latest official figure found: [News Central](https://newscentraltv.com/?p=442574); June was about ₦1,360: [Channels TV](https://www.channelstv.com/2026/06/03/naira-to-dollar-exchange-rate-today-june-3-2026/)), that is about **$38–$376**. Proposed defaults (tUSDC/USDC, 6 decimals; the simulator, A-10.3, tunes them):
+
+| Param | Value | Raw (6 dp) | Why |
+|---|---|---|---|
+| `monthly_contribution` | 5 | `5000000` | affordable for the target groups |
+| `base_limit` | 100 | `100000000` | covers the common ₦50k–₦100k deposits from month 3 |
+| `limit_per_month` | 25 | `25000000` | reaches 250 after 6 good months |
+| `max_limit` | 400 | `400000000` | covers the ₦500k case (≈ $376) |
+| `council_tier_multiplier` | 3 | — | one council member can approve up to 3× the limit |
 
 ### Derived (pure functions, unit-tested; ported to TS for the simulator)
 - `tenure_months = scaled(now − joined_at) / MONTH`

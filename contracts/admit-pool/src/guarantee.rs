@@ -21,7 +21,15 @@ impl Contract {
         patient_initials: Option<String>,
         local: Option<LocalAmount>,
     ) -> GuaranteeId {
-        let _ = (pool_id, member, hospital, amount, code_hash, patient_initials, local);
+        let _ = (
+            pool_id,
+            member,
+            hospital,
+            amount,
+            code_hash,
+            patient_initials,
+            local,
+        );
         todo!("A-3.1")
     }
 

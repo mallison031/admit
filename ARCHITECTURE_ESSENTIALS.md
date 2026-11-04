@@ -79,6 +79,6 @@
 - Hospital adoption.
 
 ## Verify
-- Sputnik factory names.
-- The mainnet USDC id.
+- ~~Sputnik factory names~~ (verified 2026-11-04: `sputnik-v2.testnet`, `sputnik-dao.near`).
+- ~~The mainnet USDC id~~ (recorded 2026-11-04).
 - Current NEP-366 relayer tooling.

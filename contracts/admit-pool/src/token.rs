@@ -7,8 +7,15 @@ use near_sdk::{near, AccountId, Promise, PromiseError};
 use crate::types::{GuaranteeId, PoolId};
 use crate::{Contract, ContractExt};
 
+// Used by settle and exits (A-2.10, A-4.2, A-4.6). Remove the allow once wired.
+#[allow(dead_code)]
 impl Contract {
-    pub(crate) fn ft_transfer(&self, token: AccountId, receiver: AccountId, amount: U128) -> Promise {
+    pub(crate) fn ft_transfer(
+        &self,
+        token: AccountId,
+        receiver: AccountId,
+        amount: U128,
+    ) -> Promise {
         let _ = (token, receiver, amount);
         todo!("A-2.10: ft_transfer with 1 yoctoNEAR")
     }
