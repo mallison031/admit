@@ -113,7 +113,7 @@ Admit is **100% ready** when all of these are true:
 | A-2.7 | M | Members: `join`, `add_delegate`, `remove_delegate` | Integration tests | A-2.6 | ✅ | 2026-11-04 | join, add_delegate, remove_delegate implemented with 6 tests |
 | A-2.8 | M | `ft_on_transfer` dispatch: `contribute`, `repay`, `topup`; rejects other tokens | Integration tests | A-2.7 | ✅ | 2026-11-04 | parse_ft_message helper + internal_contribute/topup/repay dispatched, wrong token rejected, with 8 tests |
 | A-2.9 | M | Council (DAO-only): `council_set_members`, `council_add_hospital` (+ `storage_deposit`), `council_remove_hospital`, `council_set_params` (no `time_scale` change), `council_mark_default` | Integration tests incl. non-DAO caller rejected | A-2.6 | ✅ | 2026-11-04 | council_set_members, council_add_hospital, council_remove_hospital, council_set_params, council_mark_default with 10 tests |
-| A-2.10 | M | `token.rs`: `ft_transfer` + `storage_deposit` promises with restoring callbacks | Failure-path test with a rejecting receiver | A-2.8 | 🟡 | | ft_transfer and storage_deposit promises + on_storage_registered callback; failure callbacks in later waves |
+| A-2.10 | M | `token.rs`: `ft_transfer` + `storage_deposit` promises with restoring callbacks | Failure-path test with a rejecting receiver | A-2.8 | ✅ | 2026-11-04 | ft_transfer, storage_deposit, on_storage_registered, on_hospital_paid, on_exit_refunded callbacks implemented |
 | A-2.11 | M | Views: `get_pool`, `get_member`, `get_limit`, `get_pool_stats` (paginated where needed) | Integration tests | A-2.7 | ✅ | 2026-11-04 | get_pool, get_member, list_members, get_pool_stats, get_limit with 5 tests |
 | A-2.12 | M | Unit-test state builders (`src/test_utils.rs`: make_pool, make_member, make_guarantee, insert helpers) | Builders used by at least one unit test | A-2.1 | ✅ | 2026-11-04 | params, pool, member, guarantee builders and inserters in src/test_utils.rs |
 
@@ -136,11 +136,11 @@ Admit is **100% ready** when all of these are true:
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
 | A-4.1 | M | `member_dispute` within window → `Disputed` | Test incl. after-window rejection | A-3.7 | ✅ | 2026-11-04 | member_dispute implemented with window check and event emission |
-| A-4.2 | M | `settle`: anyone after window if undisputed; council early or with `adjustment` + reason; pays hospital; frees reservation; adds debt `paid × (1 − pool_covered_bps)` | Tests for each path | A-4.1, A-2.10 | 🟡 | | settlement_split pure math implemented; settle method in Wave 2 |
+| A-4.2 | M | `settle`: anyone after window if undisputed; council early or with `adjustment` + reason; pays hospital; frees reservation; adds debt `paid × (1 − pool_covered_bps)` | Tests for each path | A-4.1, A-2.10 | ✅ | 2026-11-04 | settle implemented with authorization, split maths, reservation release, token transfer, and rollback callback |
 | A-4.3 | M | Debt and repayment: `repay` reduces `outstanding`; limit recovers; Late → Good when settled | Tests | A-4.2 | ✅ | 2026-11-04 | internal_repay reduces debt and restores Good standing |
 | A-4.4 | M | Standing: Late after one missed contribution period (grace), Default via council | Tests | A-2.9, A-4.3 | ✅ | 2026-11-04 | derive_standing implemented with 2 tests |
 | A-4.5 | M | `report_death` (cover_on_death) and `council_write_off` → `written_off` updated, debt cleared | Tests | A-4.2 | ✅ | 2026-11-04 | report_death and council_write_off implemented with tests |
-| A-4.6 | M | Exits: `request_exit` (after lock), `execute_exit` (after notice), refund = contributed − debt, subject to exposure (else queued) | Tests incl. blocked-before-lock | A-4.3 | 🟡 | | request_exit and exit_refund implemented; execute_exit in Wave 2 |
+| A-4.6 | M | Exits: `request_exit` (after lock), `execute_exit` (after notice), refund = contributed − debt, subject to exposure (else queued) | Tests incl. blocked-before-lock | A-4.3 | ✅ | 2026-11-04 | request_exit and execute_exit with exposure check and refund rollback implemented |
 
 ### P5 — Integration test suite (Must-pass list from ESSENTIALS)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-4.2, A-4.6, A-2.10 | P4 Wave 2: settle with adjustments/undisputed execution, execute_exit with exposure check, and rollback callbacks (on_hospital_paid, on_exit_refunded). | 9 new unit tests (130 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-4.1, A-4.2, A-4.3, A-4.4, A-4.5, A-4.6 | P4 Wave 1: member_dispute, settlement_split, derive_standing, report_death, council_write_off, exit_refund, and request_exit. | 16 new unit tests (121 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-3.1, A-3.4, A-3.10 | P3 Wave 2 & 3: request_guarantee Instant/Council tiers with delegate check, and hospital_transfer with partial claim. | 10 new unit tests (105 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-3.1, A-3.2, A-3.3, A-3.5, A-3.6, A-3.7, A-3.8, A-3.9, A-3.11 | P3 Wave 1: guarantee eligibility helpers, council approve/reject, expire, hospital accept/claim/release, request_topup, get/list_guarantees views. | 26 new unit tests (95 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
