@@ -226,7 +226,7 @@ mod tests {
         m.joined_at = U64(0);
         m.contributed = U128(100_000_000);
         // Only 1 month tenure
-        let now = 1 * NS_PER_MONTH;
+        let now = NS_PER_MONTH;
         assert_eq!(limit(&m, &p, 0, now), 0);
     }
 

@@ -110,7 +110,7 @@ impl Contract {
     #[private]
     pub fn on_storage_registered(
         &mut self,
-        #[callback_result] result: Result<(), PromiseError>,
+        #[callback_result] result: Result<near_sdk::serde_json::Value, PromiseError>,
         pool_id: PoolId,
         account: AccountId,
     ) {

@@ -95,13 +95,14 @@ impl Contract {
             .get(&pool_id)
             .cloned()
             .unwrap_or_else(|| near_sdk::env::panic_str(crate::errors::E01_POOL_NOT_FOUND));
-        let member = self
+        let mut member = self
             .members
             .get(&(pool_id, account.clone()))
             .cloned()
             .unwrap_or_else(|| near_sdk::env::panic_str(crate::errors::E24_MEMBER_NOT_FOUND));
 
         let now_ns = near_sdk::env::block_timestamp();
+        member.standing = crate::limits::derive_standing(&member, &pool.params, now_ns);
 
         let mut reserved_for_member = 0u128;
         for (_, g) in self.guarantees.iter() {
@@ -300,7 +301,7 @@ mod tests {
 
         // Context at 1 month (less than min_tenure_months = 2)
         let ctx = VMContextBuilder::new()
-            .block_timestamp(1 * NS_PER_MONTH)
+            .block_timestamp(NS_PER_MONTH)
             .build();
         testing_env!(ctx);
 
