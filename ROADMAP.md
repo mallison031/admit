@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
 | **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
-| **Must progress** | 13 / 105 Must tasks done (12%) |
-| **Overall progress** | 13 / 114 tasks done (11%) — 105 Must · 6 Should · 3 Could |
+| **Must progress** | 14 / 105 Must tasks done (13%) |
+| **Overall progress** | 14 / 114 tasks done (12%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -80,7 +80,7 @@ Admit is **100% ready** when all of these are true:
 | A-0.1 | M | Confirm git identity (name/email) for this repo | User confirms; recorded in AGENTS.md Git section | — | ✅ | 2026-11-04 | Allison <muyideenallison@gmail.com>; GitHub mallison031 |
 | A-0.2 | M | Approve extra deps: Vitest, `near-contract-standards` | User approves; added to ARCHITECTURE §2 | — | ✅ | 2026-11-04 | Vitest 5.1 + near-contract-standards 5.30 approved and added |
 | A-0.3 | M | Verify Sputnik DAO v2 factory accounts (testnet/mainnet) and the fixed-weight vote policy JSON | Answer recorded in ARCHITECTURE §2; VERIFY tag removed | — | ✅ | 2026-11-04 | sputnik-v2.testnet + sputnik-dao.near confirmed on-chain; fixed weight = `"3"` |
-| A-0.4 | M | Pin the Sputnik DAO v2 wasm (source commit + sha256) | `contracts/admit-pool/res/` has the wasm + `SPUTNIK_VERSION.txt` | A-1.4 | ⬜ | | |
+| A-0.4 | M | Pin the Sputnik DAO v2 wasm (source commit + sha256) | `contracts/admit-pool/res/` has the wasm + `SPUTNIK_VERSION.txt` | A-1.4 | ✅ | 2026-11-04 | live testnet DAO code v2.0.0; sha256 matches chain |
 | A-0.5 | M | Verify `cargo-near` build subcommand and `near-workspaces` version for near-sdk 5.x | Commands recorded in project_structure §4 | — | ✅ | 2026-11-04 | cargo-near 0.22.0: `cargo near build non-reproducible-wasm` confirmed; near-cli-rs installed |
 | A-0.6 | M | Verify current NEP-366 relayer approach (library vs hand-rolled with `near-api-js` `signedDelegate`) | Decision recorded in ARCHITECTURE §2 + §14 | — | ⬜ | | |
 | A-0.7 | M | Research real emergency deposit sizes (Nigeria) with sources, and set default `base_limit` / `limit_per_month` / `max_limit` | Values + citations in ARCHITECTURE §4 and README draft | — | ⬜ | | |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-0.4 | Pinned sputnikdao2.wasm (v2.0.0, downloaded from the testnet factory's latest DAO; sha256 matches on-chain checksum). | `shasum -a 256` ✅ matches chain |
 | 2026-11-04 | A-0.3 | Verified Sputnik factories on-chain and the fixed-weight threshold format; recorded in ARCHITECTURE §2 and .env.example. | n/a (docs) |
 | 2026-11-04 | A-2.12 (new) | Created 202 GitHub issues covering every open roadmap task (milestone per phase; labels phase/area/size/wave/maintainer; index in docs/ISSUES.md). Repo interaction limited to collaborators. Header rule changed: contributions update their row + Changelog only; maintainer recomputes the header with tools/roadmap.py. Added A-2.12 (test-state builders) so wave issues stay independent. | n/a (docs and process) |
 | 2026-11-04 | A-13.10 | Repo made public at github.com/mallison031/admit on the user's explicit OK. | n/a |

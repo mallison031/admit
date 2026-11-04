@@ -1,5 +1,8 @@
-# Pinned Sputnik DAO v2 wasm (A-0.4) — fill in when the wasm is added:
+# Pinned Sputnik DAO v2 wasm used by the sandbox tests (A-0.4).
+# The repo publishes no release wasm, so this is the exact code deployed today by the testnet factory.
 source_repo: https://github.com/near-daos/sputnik-dao-contract
-source_commit: TODO
+source: on-chain code of herald-dao.sputnik-v2.testnet (most recent DAO from sputnik-v2.testnet get_dao_list)
+dao_contract_version: 2.0.0
+downloaded: 2026-11-04 with `near contract download-wasm regular herald-dao.sputnik-v2.testnet save-to-file ... network-config testnet now`
 file: sputnikdao2.wasm
-sha256: TODO
+sha256: 084441471c11099d78e2eecda571dd4d8c29153282807edd415935c97355dd56   (matches the chain's code checksum)
