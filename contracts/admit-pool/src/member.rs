@@ -38,18 +38,35 @@ impl Contract {
     }
 }
 
+// Called from ft_on_transfer once dispatch is implemented (A-2.8, A-4.3). Remove the allow once wired.
+#[allow(dead_code)]
 impl Contract {
-    pub(crate) fn internal_contribute(&mut self, pool_id: PoolId, member: AccountId, amount: U128) -> U128 {
+    pub(crate) fn internal_contribute(
+        &mut self,
+        pool_id: PoolId,
+        member: AccountId,
+        amount: U128,
+    ) -> U128 {
         let _ = (pool_id, member, amount);
         todo!("A-2.8: returns unused amount")
     }
 
-    pub(crate) fn internal_repay(&mut self, pool_id: PoolId, member: AccountId, amount: U128) -> U128 {
+    pub(crate) fn internal_repay(
+        &mut self,
+        pool_id: PoolId,
+        member: AccountId,
+        amount: U128,
+    ) -> U128 {
         let _ = (pool_id, member, amount);
         todo!("A-4.3: reduces outstanding; refunds any excess")
     }
 
-    pub(crate) fn internal_topup(&mut self, pool_id: PoolId, from: AccountId, amount: U128) -> U128 {
+    pub(crate) fn internal_topup(
+        &mut self,
+        pool_id: PoolId,
+        from: AccountId,
+        amount: U128,
+    ) -> U128 {
         let _ = (pool_id, from, amount);
         todo!("A-2.8: donation to pool balance")
     }

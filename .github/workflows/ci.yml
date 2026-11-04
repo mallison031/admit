@@ -1,19 +1,28 @@
-# CI — lint + unit tests + contract tests (A-1.9). Draft: finish once the toolchain is verified (A-0.5).
+# CI: lint + unit tests + sandbox integration tests on every push and PR (A-1.9).
 name: ci
-# Manual-only until the toolchain + lockfile exist (ROADMAP A-1.9); then switch back to [push, pull_request].
-on: [workflow_dispatch]
+on: [push, pull_request]
 
 jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
+        with: { version: 11 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - uses: dtolnay/rust-toolchain@stable
         with: { targets: wasm32-unknown-unknown, components: "rustfmt, clippy" }
-      # TODO(A-1.9): install cargo-near (prebuilt binary) and cache it
+      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo-near 0.22.0 (prebuilt, checksum-verified)
+        run: |
+          V=0.22.0; F=cargo-near-x86_64-unknown-linux-gnu.tar.gz
+          BASE=https://github.com/near/cargo-near/releases/download/cargo-near-v$V
+          curl -fsSLO "$BASE/$F" && curl -fsSLO "$BASE/$F.sha256"
+          echo "$(cut -d' ' -f1 "$F.sha256")  $F" | sha256sum -c -
+          tar -xzf "$F"
+          install -m 755 "$(find . -maxdepth 3 -type f -name cargo-near | head -1)" "$HOME/.cargo/bin/cargo-near"
+          cargo near --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm test

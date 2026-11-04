@@ -15,7 +15,12 @@ impl Contract {
     }
 
     /// Accepted → Claimed; amount ≤ guarantee (E15); starts the dispute window.
-    pub fn hospital_claim(&mut self, guarantee_id: GuaranteeId, amount: U128, file_hash: CryptoHash) {
+    pub fn hospital_claim(
+        &mut self,
+        guarantee_id: GuaranteeId,
+        amount: U128,
+        file_hash: CryptoHash,
+    ) {
         let _ = (guarantee_id, amount, file_hash);
         todo!("A-3.7")
     }

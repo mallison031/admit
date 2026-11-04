@@ -22,7 +22,12 @@ impl Contract {
         todo!("A-2.11")
     }
 
-    pub fn list_members(&self, pool_id: PoolId, from_index: Option<u64>, limit: Option<u64>) -> Vec<Member> {
+    pub fn list_members(
+        &self,
+        pool_id: PoolId,
+        from_index: Option<u64>,
+        limit: Option<u64>,
+    ) -> Vec<Member> {
         let _ = (pool_id, from_index, limit);
         todo!("A-2.11")
     }
@@ -38,7 +43,12 @@ impl Contract {
         todo!("A-3.11")
     }
 
-    pub fn list_guarantees(&self, pool_id: PoolId, from_index: Option<u64>, limit: Option<u64>) -> Vec<Guarantee> {
+    pub fn list_guarantees(
+        &self,
+        pool_id: PoolId,
+        from_index: Option<u64>,
+        limit: Option<u64>,
+    ) -> Vec<Guarantee> {
         let _ = (pool_id, from_index, limit);
         todo!("A-3.11")
     }

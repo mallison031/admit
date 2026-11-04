@@ -8,8 +8,14 @@ use near_workspaces::types::NearToken;
 use near_workspaces::{Account, Contract, Worker};
 use serde_json::json;
 
-pub const POOL_WASM: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../target/near/admit_pool/admit_pool.wasm");
-pub const FT_WASM: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../target/near/mock_ft/mock_ft.wasm");
+pub const POOL_WASM: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../target/near/admit_pool/admit_pool.wasm"
+);
+pub const FT_WASM: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../target/near/mock_ft/mock_ft.wasm"
+);
 
 /// 1 tUSDC in raw units (6 decimals).
 pub const TUSDC: u128 = 1_000_000;
@@ -21,20 +27,40 @@ pub struct Env {
 }
 
 fn read(path: &str) -> Vec<u8> {
-    std::fs::read(path).unwrap_or_else(|_| panic!("{path} missing: run `pnpm build:contract` first"))
+    std::fs::read(path)
+        .unwrap_or_else(|_| panic!("{path} missing: run `pnpm build:contract` first"))
 }
 
 /// Starts a sandbox, deploys admit-pool (`new({ai_reviewer: null})`) and mock-ft (`new()`),
 /// and registers the pool with the token so it can receive transfers.
 pub async fn setup() -> Env {
     let worker = near_workspaces::sandbox().await.expect("start sandbox");
-    let pool = worker.dev_deploy(&read(POOL_WASM)).await.expect("deploy admit-pool");
-    let r = pool.call("new").args_json(json!({ "ai_reviewer": null })).transact().await.expect("pool new");
-    assert!(r.is_success(), "admit-pool new() failed: {:?}", r.failures());
-    let token = worker.dev_deploy(&read(FT_WASM)).await.expect("deploy mock-ft");
+    let pool = worker
+        .dev_deploy(&read(POOL_WASM))
+        .await
+        .expect("deploy admit-pool");
+    let r = pool
+        .call("new")
+        .args_json(json!({ "ai_reviewer": null }))
+        .transact()
+        .await
+        .expect("pool new");
+    assert!(
+        r.is_success(),
+        "admit-pool new() failed: {:?}",
+        r.failures()
+    );
+    let token = worker
+        .dev_deploy(&read(FT_WASM))
+        .await
+        .expect("deploy mock-ft");
     let r = token.call("new").transact().await.expect("token new");
     assert!(r.is_success(), "mock-ft new() failed: {:?}", r.failures());
-    let env = Env { worker, pool, token };
+    let env = Env {
+        worker,
+        pool,
+        token,
+    };
     env.register_storage(env.pool.as_account()).await;
     env
 }

@@ -98,7 +98,7 @@ Admit is **100% ready** when all of these are true:
 | A-1.6 | M | `tests/common/mod.rs` sandbox harness (deploy pool + mock-ft + Sputnik, create accounts) | A smoke test deploys everything in sandbox | A-1.4, A-1.5, A-0.4 | ✅ | 2026-11-04 | setup() deploys admit-pool + mock-ft; user/register_storage/mint/balance helpers; 2 smoke tests |
 | A-1.7 | M | `packages/core`, `apps/api`, `apps/web`, `scripts` skeletons | `pnpm build` and `pnpm -r test` pass (placeholder tests) | A-1.2 | ✅ | 2026-11-04 | tsc -b, eslint, next build, pnpm -r test all pass (tests are todo placeholders) |
 | A-1.8 | M | `.env.example` with every var from ARCHITECTURE §13 | File matches §13 exactly | A-1.2 | ✅ | 2026-11-04 | .env.example is the source of truth; ARCHITECTURE §13 points to it |
-| A-1.9 | M | CI: `.github/workflows/ci.yml` (lint + unit + contract tests) | CI green on first push | A-1.6, A-1.7 | 🟡 |  | ci.yml drafted; manual-only (workflow_dispatch) until lockfile + cargo-near step exist |
+| A-1.9 | M | CI: `.github/workflows/ci.yml` (lint + unit + contract tests) | CI green on first push | A-1.6, A-1.7 | 🟡 |  | workflow runs on push/PR with checksum-verified cargo-near; awaiting first green run |
 | A-1.10 | M | README stub (title, one-line pitch, "status: in progress", link to ROADMAP) + Contributing section stating the ROADMAP update rule | Exists; Contributing section present | A-1.1 | ✅ | 2026-11-04 | README stub with Contributing section |
 
 ### P2 — Contract core
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-1.9 | CI runs lint + all tests on push/PR; installs cargo-near 0.22.0 from the checksum-verified release. Fixed `pnpm lint` (clippy now targets wasm32; allowed dead code on two stub blocks until P2 wires them). | pnpm lint ✅ locally |
 | 2026-11-04 | A-1.6 | Harness now deploys mock-ft too, registers the pool with the token, and adds user, register_storage, mint and balance helpers. | cargo test -p admit-pool --test smoke ✅ 2 passed |
 | 2026-11-04 | A-1.6 | Sandbox harness: setup() deploys admit-pool and calls new(); smoke test added. | cargo test -p admit-pool --test smoke ✅ 1 passed |
 | 2026-11-04 | A-1.5 | mock-ft implements NEP-141 + NEP-145 (near-contract-standards 5.30) with an open mint. | cargo test -p mock-ft ✅ 3 passed · wasm build ✅ · clippy ✅ |
