@@ -7,9 +7,9 @@
 |---|---|
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P3 — Guarantees (requests, council tier, lifecycle, top-ups, expiry) |
-| **Next task** | P3 Wave 1 (check_initials, get/list_guarantees, council_approve/reject, eligibility helpers, hospital lifecycle, request_topup) |
-| **Must progress** | 29 / 105 Must tasks done (28%) |
-| **Overall progress** | 30 / 114 tasks done (26%) — 105 Must · 6 Should · 3 Could |
+| **Next task** | P3 Wave 2 (request_guarantee, hospital_transfer) |
+| **Must progress** | 37 / 105 Must tasks done (35%) |
+| **Overall progress** | 38 / 114 tasks done (33%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
