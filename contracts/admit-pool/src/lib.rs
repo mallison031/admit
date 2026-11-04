@@ -23,7 +23,7 @@ pub mod views;
 #[cfg(test)]
 pub mod test_utils;
 
-use errors::E29_INVALID_MESSAGE;
+use errors::{E01_POOL_NOT_FOUND, E20_WRONG_TOKEN, E29_INVALID_MESSAGE};
 use types::{FtMessage, Guarantee, GuaranteeId, Member, Pool, PoolId};
 
 #[near(serializers = [borsh])]
@@ -71,12 +71,32 @@ impl Contract {
         amount: U128,
         msg: String,
     ) -> PromiseOrValue<U128> {
-        let _ = (sender_id, amount, msg);
-        todo!("A-2.8: parse FtMessage and dispatch to member::internal_*")
+        let parsed = parse_ft_message(&msg);
+        let pool_id = match parsed {
+            FtMessage::Contribute(id) => id,
+            FtMessage::Repay(id) => id,
+            FtMessage::Topup(id) => id,
+        };
+
+        let pool = self
+            .pools
+            .get(&pool_id)
+            .unwrap_or_else(|| env::panic_str(E01_POOL_NOT_FOUND));
+
+        if env::predecessor_account_id() != pool.token {
+            env::panic_str(E20_WRONG_TOKEN);
+        }
+
+        let unused = match parsed {
+            FtMessage::Contribute(id) => self.internal_contribute(id, sender_id, amount),
+            FtMessage::Repay(id) => self.internal_repay(id, sender_id, amount),
+            FtMessage::Topup(id) => self.internal_topup(id, sender_id, amount),
+        };
+
+        PromiseOrValue::Value(unused)
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn parse_ft_message(msg: &str) -> FtMessage {
     serde_json::from_str::<FtMessage>(msg).unwrap_or_else(|_| env::panic_str(E29_INVALID_MESSAGE))
 }
@@ -107,5 +127,133 @@ mod tests {
     #[should_panic(expected = "E29_INVALID_MESSAGE")]
     fn rejects_garbage() {
         parse_ft_message("not valid json");
+    }
+
+    #[test]
+    fn ft_on_transfer_contribute() {
+        use crate::test_utils::{insert_member, insert_pool, member, pool};
+        use near_sdk::test_utils::VMContextBuilder;
+        use near_sdk::testing_env;
+
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.token = "usdc.near".parse().unwrap();
+        insert_pool(&mut contract, p);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.contributed = U128(0);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("usdc.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        let res = contract.ft_on_transfer(
+            "alice.near".parse().unwrap(),
+            U128(50),
+            r#"{"contribute":0}"#.to_string(),
+        );
+
+        match res {
+            PromiseOrValue::Value(unused) => assert_eq!(unused.0, 0),
+            _ => panic!("expected PromiseOrValue::Value"),
+        }
+
+        let m = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(m.contributed.0, 50);
+    }
+
+    #[test]
+    fn ft_on_transfer_repay() {
+        use crate::test_utils::{insert_member, insert_pool, member, pool};
+        use near_sdk::test_utils::VMContextBuilder;
+        use near_sdk::testing_env;
+
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.token = "usdc.near".parse().unwrap();
+        insert_pool(&mut contract, p);
+        let mut m = member(0, "alice.near".parse().unwrap());
+        m.outstanding = U128(30);
+        insert_member(&mut contract, m);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("usdc.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        let res = contract.ft_on_transfer(
+            "alice.near".parse().unwrap(),
+            U128(50),
+            r#"{"repay":0}"#.to_string(),
+        );
+
+        match res {
+            PromiseOrValue::Value(unused) => assert_eq!(unused.0, 20),
+            _ => panic!("expected PromiseOrValue::Value"),
+        }
+
+        let m = contract
+            .get_member(0, "alice.near".parse().unwrap())
+            .unwrap();
+        assert_eq!(m.outstanding.0, 0);
+    }
+
+    #[test]
+    fn ft_on_transfer_topup() {
+        use crate::test_utils::{insert_pool, pool};
+        use near_sdk::test_utils::VMContextBuilder;
+        use near_sdk::testing_env;
+
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.token = "usdc.near".parse().unwrap();
+        let initial_balance = p.balance.0;
+        insert_pool(&mut contract, p);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("usdc.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        let res = contract.ft_on_transfer(
+            "funder.near".parse().unwrap(),
+            U128(100),
+            r#"{"topup":0}"#.to_string(),
+        );
+
+        match res {
+            PromiseOrValue::Value(unused) => assert_eq!(unused.0, 0),
+            _ => panic!("expected PromiseOrValue::Value"),
+        }
+
+        let p = contract.get_pool(0).unwrap();
+        assert_eq!(p.balance.0, initial_balance + 100);
+    }
+
+    #[test]
+    #[should_panic(expected = "E20_WRONG_TOKEN")]
+    fn ft_on_transfer_rejects_wrong_token() {
+        use crate::test_utils::{insert_pool, pool};
+        use near_sdk::test_utils::VMContextBuilder;
+        use near_sdk::testing_env;
+
+        let mut contract = Contract::new(None);
+        let mut p = pool(0);
+        p.token = "usdc.near".parse().unwrap();
+        insert_pool(&mut contract, p);
+
+        let ctx = VMContextBuilder::new()
+            .predecessor_account_id("scam_token.near".parse().unwrap())
+            .build();
+        testing_env!(ctx);
+
+        let _ = contract.ft_on_transfer(
+            "alice.near".parse().unwrap(),
+            U128(50),
+            r#"{"contribute":0}"#.to_string(),
+        );
     }
 }
