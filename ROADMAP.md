@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
 | **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
-| **Must progress** | 18 / 105 Must tasks done (17%) |
-| **Overall progress** | 19 / 114 tasks done (17%) — 105 Must · 6 Should · 3 Could |
+| **Must progress** | 19 / 105 Must tasks done (18%) |
+| **Overall progress** | 20 / 114 tasks done (18%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -98,7 +98,7 @@ Admit is **100% ready** when all of these are true:
 | A-1.6 | M | `tests/common/mod.rs` sandbox harness (deploy pool + mock-ft + Sputnik, create accounts) | A smoke test deploys everything in sandbox | A-1.4, A-1.5, A-0.4 | ✅ | 2026-11-04 | setup() deploys admit-pool + mock-ft; user/register_storage/mint/balance helpers; 2 smoke tests |
 | A-1.7 | M | `packages/core`, `apps/api`, `apps/web`, `scripts` skeletons | `pnpm build` and `pnpm -r test` pass (placeholder tests) | A-1.2 | ✅ | 2026-11-04 | tsc -b, eslint, next build, pnpm -r test all pass (tests are todo placeholders) |
 | A-1.8 | M | `.env.example` with every var from ARCHITECTURE §13 | File matches §13 exactly | A-1.2 | ✅ | 2026-11-04 | .env.example is the source of truth; ARCHITECTURE §13 points to it |
-| A-1.9 | M | CI: `.github/workflows/ci.yml` (lint + unit + contract tests) | CI green on first push | A-1.6, A-1.7 | 🟡 |  | workflow runs on push/PR with checksum-verified cargo-near; awaiting first green run |
+| A-1.9 | M | CI: `.github/workflows/ci.yml` (lint + unit + contract tests) | CI green on first push | A-1.6, A-1.7 | ✅ | 2026-11-04 | CI green on GitHub: cargo-near 0.22.0, lint, contract builds, smoke + mock-ft tests |
 | A-1.10 | M | README stub (title, one-line pitch, "status: in progress", link to ROADMAP) + Contributing section stating the ROADMAP update rule | Exists; Contributing section present | A-1.1 | ✅ | 2026-11-04 | README stub with Contributing section |
 
 ### P2 — Contract core
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-1.9 | First CI runs green on GitHub (runs 41797073885, 41797447043). | CI ✅ lint · build · 2 smoke + 3 mock-ft tests |
 | 2026-11-04 | A-0.8 | Created testnet root `admit-hack-6711fd.testnet` via the faucet (10 NEAR; one faucet grant) and sub-accounts pool (3), tusdc (1.5), relay (1), council1–3, hospital1–2, member1–3 (0.3 each). Root keeps ~2 NEAR for fees. Added COUNCIL/HOSPITAL/MEMBER_ACCOUNTS to .env.example. | view-account-summary ✅ |
 | 2026-11-04 | A-1.9 | CI runs lint + all tests on push/PR; installs cargo-near 0.22.0 from the checksum-verified release. Fixed `pnpm lint` (clippy now targets wasm32; allowed dead code on two stub blocks until P2 wires them). | pnpm lint ✅ locally |
 | 2026-11-04 | A-1.6 | Harness now deploys mock-ft too, registers the pool with the token, and adds user, register_storage, mint and balance helpers. | cargo test -p admit-pool --test smoke ✅ 2 passed |
