@@ -49,6 +49,7 @@
 |---|---|
 | Contract | Rust, `near-sdk` 5.30, `cargo-near` |
 | Tests | `near-workspaces` 0.24, unit tests; TS packages use Node's built-in `node:test` via `tsx` (no extra dependency) |
+| Approved extra deps (2026-11-04) | `near-contract-standards` 5.30 (mock-ft NEP-141/145) · Vitest 5.1 (web tests) |
 | Token | Mock NEP-141 `tusdc.<you>.testnet` (with NEP-145 storage); mainnet USDC **VERIFY** id |
 | Council | Sputnik DAO v2 (factory **VERIFY**) |
 | Relayer | NEP-366 delegate actions; `admit-api` relayer account with allow-list `admit-pool` methods only (reference: `pagoda-relayer-rs` or a small TS relayer with `near-api-js` `signedDelegate`) **VERIFY** current relayer tooling |

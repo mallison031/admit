@@ -144,7 +144,7 @@ web/
 │   ├── wallet.ts                 # wallet-selector setup (members, council)
 │   ├── device-key.ts             # generate/store device keypair (IndexedDB), never leaves the device
 │   └── relay.ts                  # POST signed delegate actions to apps/api
-└── test/                         # component + flow tests (Vitest, pending approval A-0.2)
+└── test/                         # component + flow tests (Vitest)
 ```
 **Rules**
 - **`g/[id]`** must work with no API at all, using only RPC view calls (ARCHITECTURE §8).
@@ -190,7 +190,7 @@ scripts/
 | Script | Runs |
 |---|---|
 | `build` | `pnpm build:contract && pnpm -r --filter ./packages/* --filter ./apps/* build` |
-| `build:contract` | `cargo near build non-reproducible-wasm` in each contract (**VERIFY** subcommand with `cargo near --help`) |
+| `build:contract` | `cargo near build non-reproducible-wasm` in each contract (verified with cargo-near 0.22.0) |
 | `check:contract` | `cargo check --workspace --target wasm32-unknown-unknown` (fast type-check; plain host `cargo check` is blocked by near-sdk) |
 | `test` | `pnpm test:contract && pnpm -r test` |
 | `test:contract` | `pnpm build:contract && cargo test --workspace` |

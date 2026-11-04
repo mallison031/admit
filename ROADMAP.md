@@ -6,10 +6,10 @@
 | | |
 |---|---|
 | **Last updated** | 2026-11-04 |
-| **Current phase** | P0–P1 (scaffold written; decisions pending) |
-| **Next task** | A-0.2 (approve Vitest + near-contract-standards), then A-1.2 `pnpm install` |
-| **Must progress** | 6 / 104 Must tasks done (6%) |
-| **Overall progress** | 6 / 113 tasks done (5%) — 104 Must · 6 Should · 3 Could |
+| **Current phase** | P1 — Scaffolding (toolchain installed, everything builds) |
+| **Next task** | A-1.5 (mock-ft NEP-141), A-1.6 (sandbox smoke test), then P2 |
+| **Must progress** | 11 / 104 Must tasks done (11%) |
+| **Overall progress** | 11 / 113 tasks done (10%) — 104 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
@@ -79,10 +79,10 @@ Admit is **100% ready** when all of these are true:
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
 | A-0.1 | M | Confirm git identity (name/email) for this repo | User confirms; recorded in AGENTS.md Git section | — | ✅ | 2026-11-04 | Allison <muyideenallison@gmail.com>; GitHub mallison031 |
-| A-0.2 | M | Approve extra deps: Vitest, `near-contract-standards` | User approves; added to ARCHITECTURE §2 | — | ⬜ | | |
+| A-0.2 | M | Approve extra deps: Vitest, `near-contract-standards` | User approves; added to ARCHITECTURE §2 | — | ✅ | 2026-11-04 | Vitest 5.1 + near-contract-standards 5.30 approved and added |
 | A-0.3 | M | Verify Sputnik DAO v2 factory accounts (testnet/mainnet) and the fixed-weight vote policy JSON | Answer recorded in ARCHITECTURE §2; VERIFY tag removed | — | ⬜ | | |
 | A-0.4 | M | Pin the Sputnik DAO v2 wasm (source commit + sha256) | `contracts/admit-pool/res/` has the wasm + `SPUTNIK_VERSION.txt` | A-1.4 | ⬜ | | |
-| A-0.5 | M | Verify `cargo-near` build subcommand and `near-workspaces` version for near-sdk 5.x | Commands recorded in project_structure §4 | — | 🟡 |  | near-sdk 5.30.0 + near-workspaces 0.24.0 chosen; cargo-near not installed yet — build subcommand still to verify |
+| A-0.5 | M | Verify `cargo-near` build subcommand and `near-workspaces` version for near-sdk 5.x | Commands recorded in project_structure §4 | — | ✅ | 2026-11-04 | cargo-near 0.22.0: `cargo near build non-reproducible-wasm` confirmed; near-cli-rs installed |
 | A-0.6 | M | Verify current NEP-366 relayer approach (library vs hand-rolled with `near-api-js` `signedDelegate`) | Decision recorded in ARCHITECTURE §2 + §14 | — | ⬜ | | |
 | A-0.7 | M | Research real emergency deposit sizes (Nigeria) with sources, and set default `base_limit` / `limit_per_month` / `max_limit` | Values + citations in ARCHITECTURE §4 and README draft | — | ⬜ | | |
 | A-0.8 | M | Create and fund testnet accounts: deployer, `admit`, `tusdc`, `relay`, 3 council members, 2 hospitals, demo members | Accounts listed in `.env` (not committed); faucet limits noted | — | ⬜ | | |
@@ -92,12 +92,12 @@ Admit is **100% ready** when all of these are true:
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
 | A-1.1 | M | `git init`, `.gitignore`, `.editorconfig`, `.nvmrc`, MIT `LICENSE` | Repo initialised; first commit has no AI attribution | A-0.1 | ✅ | 2026-11-04 | git init; private repo mallison031/admit |
-| A-1.2 | M | pnpm workspace: root `package.json` (all scripts from project_structure §4), `pnpm-workspace.yaml`, `tsconfig.base.json`, ESLint, Prettier | `pnpm install` works | A-1.1 | 🟡 |  | all files written; pnpm install not run yet |
+| A-1.2 | M | pnpm workspace: root `package.json` (all scripts from project_structure §4), `pnpm-workspace.yaml`, `tsconfig.base.json`, ESLint, Prettier | `pnpm install` works | A-1.1 | ✅ | 2026-11-04 | pnpm 11.17 install OK; allowBuilds = esbuild only; next pinned 16.4.4 (release-age policy) |
 | A-1.3 | M | Rust workspace: `Cargo.toml`, `rust-toolchain.toml`, `rustfmt.toml` | `cargo check --workspace` works | A-1.1 | ✅ | 2026-11-04 | cargo check --target wasm32 passes |
-| A-1.4 | M | `contracts/admit-pool` skeleton (empty contract, module files from project_structure §2.1) | `pnpm build:contract` produces wasm | A-1.3, A-0.5 | 🟡 |  | skeleton + data model compile for wasm; cargo near build pending A-0.5 |
+| A-1.4 | M | `contracts/admit-pool` skeleton (empty contract, module files from project_structure §2.1) | `pnpm build:contract` produces wasm | A-1.3, A-0.5 | ✅ | 2026-11-04 | contract wasm builds with cargo-near |
 | A-1.5 | M | `contracts/mock-ft` (NEP-141 + NEP-145 + open `mint`) | Builds; unit test mints and transfers | A-1.3, A-0.2 | 🟡 |  | stub compiles; NEP-141/145 pending A-0.2 |
 | A-1.6 | M | `tests/common/mod.rs` sandbox harness (deploy pool + mock-ft + Sputnik, create accounts) | A smoke test deploys everything in sandbox | A-1.4, A-1.5, A-0.4 | 🟡 |  | harness + 36 named #[ignore] test skeletons written |
-| A-1.7 | M | `packages/core`, `apps/api`, `apps/web`, `scripts` skeletons | `pnpm build` and `pnpm -r test` pass (placeholder tests) | A-1.2 | 🟡 |  | core/api/web/scripts skeletons written; build/test not run (needs pnpm install) |
+| A-1.7 | M | `packages/core`, `apps/api`, `apps/web`, `scripts` skeletons | `pnpm build` and `pnpm -r test` pass (placeholder tests) | A-1.2 | ✅ | 2026-11-04 | tsc -b, eslint, next build, pnpm -r test all pass (tests are todo placeholders) |
 | A-1.8 | M | `.env.example` with every var from ARCHITECTURE §13 | File matches §13 exactly | A-1.2 | ✅ | 2026-11-04 | .env.example is the source of truth; ARCHITECTURE §13 points to it |
 | A-1.9 | M | CI: `.github/workflows/ci.yml` (lint + unit + contract tests) | CI green on first push | A-1.6, A-1.7 | 🟡 |  | ci.yml drafted; manual-only (workflow_dispatch) until lockfile + cargo-near step exist |
 | A-1.10 | M | README stub (title, one-line pitch, "status: in progress", link to ROADMAP) + Contributing section stating the ROADMAP update rule | Exists; Contributing section present | A-1.1 | ✅ | 2026-11-04 | README stub with Contributing section |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-0.2, A-0.5, A-1.2, A-1.4, A-1.7 | Approved deps added (Vitest, near-contract-standards); installed cargo-near 0.22.0 + near-cli-rs; pnpm install with build-script allow-list; pinned next 16.4.4 to respect pnpm's minimum release age; ignored next-env.d.ts; docs updated (AGENTS toolchain, ARCHITECTURE §2, project_structure). | cargo near build ✅ (2 contracts) · cargo test ✅ 0 failed (scaffold tests ignored) · tsc -b ✅ · eslint ✅ · next build ✅ · pnpm -r test ✅ 0 failed (todo placeholders) |
 | 2026-11-04 | A-0.1, A-1.1, A-1.9 | Git initialised; identity recorded in AGENTS.md; CI set to manual-only; first push to private repo mallison031/admit. | n/a (no code change) |
 | 2026-11-04 | A-1.1–A-1.10, A-2.1, A-0.5 | Scaffolded the full repo per project_structure.md: root config, Rust workspace, admit-pool data model + method stubs, mock-ft stub, 36 named integration-test skeletons, /core (zod mirror of the data model), api, web, scripts, fixtures. Docs synced to current versions (Next 16, near-sdk 5.30, zod 4, near-api-js 7) and to `.env.example`. | `cargo check --target wasm32-unknown-unknown` ✅ (warnings: unused stubs); TS not installed yet |
 | 2026-11-04 | A-D.6 | Created ROADMAP.md; update-on-every-contribution rule added to AGENTS.md, CLAUDE.md, project_structure.md and the other docs | n/a (docs only) |
