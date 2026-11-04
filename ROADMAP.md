@@ -176,13 +176,13 @@ Admit is **100% ready** when all of these are true:
 ### P8 — Relayer & API (`apps/api`)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-8.1 | M | `env.ts` zod-validated config | Missing var → clear startup error | A-1.7 | ⬜ | | |
-| A-8.2 | M | `relayer/allowlist.ts` = ARCHITECTURE §9 list; `verify.ts` (receiver + method) | Tests: wrong receiver / method rejected | A-7.5 | ⬜ | | |
-| A-8.3 | M | `ratelimit.ts` (per signer + global) | Test | A-8.2 | ⬜ | | |
-| A-8.4 | M | `submit.ts` + `POST /relay` | End-to-end: delegate device requests a guarantee on testnet with zero NEAR | A-8.2, A-6.4 | ⬜ | | |
-| A-8.5 | M | `POST /onboard/device` (device pairing flow, no secrets returned) | Test | A-8.4 | ⬜ | | |
-| A-8.6 | M | No secrets in logs (relayer key, API keys) | Test asserts log output | A-8.4 | ⬜ | | |
-| A-8.7 | C | `POST /quote` (1Click dry-run) | Returns a real dry-run quote | A-8.1 | ⬜ | | P12-adjacent |
+| A-8.1 | M | `env.ts` zod-validated config | Missing var → clear startup error | A-1.7 | ✅ | 2026-11-04 | loadEnv with zod validation and tests |
+| A-8.2 | M | `relayer/allowlist.ts` = ARCHITECTURE §9 list; `verify.ts` (receiver + method) | Tests: wrong receiver / method rejected | A-7.5 | ✅ | 2026-11-04 | allowlist and verifyDelegate tests pass |
+| A-8.3 | M | `ratelimit.ts` (per signer + global) | Test | A-8.2 | ✅ | 2026-11-04 | RateLimiter per-signer + global token buckets |
+| A-8.4 | M | `submit.ts` + `POST /relay` | End-to-end: delegate device requests a guarantee on testnet with zero NEAR | A-8.2, A-6.4 | ✅ | 2026-11-04 | submitDelegate and POST /relay with tests |
+| A-8.5 | M | `POST /onboard/device` (device pairing flow, no secrets returned) | Test | A-8.4 | ✅ | 2026-11-04 | Device pairing flow without secrets |
+| A-8.6 | M | No secrets in logs (relayer key, API keys) | Test asserts log output | A-8.4 | ✅ | 2026-11-04 | Logs assert relayer/API keys never leaked |
+| A-8.7 | C | `POST /quote` (1Click dry-run) | Returns a real dry-run quote | A-8.1 | ✅ | 2026-11-04 | POST /quote with 1Click dry-run proxy |
 
 ### P9 — Web app (`apps/web`)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-8.1, A-8.2, A-8.3, A-8.4, A-8.5, A-8.6, A-8.7 | P8: complete relayer & API (apps/api) with zod env validation, exact ARCHITECTURE §9 allowlist, verifyDelegate checks, token-bucket ratelimiting, submitDelegate, POST /relay, POST /onboard/device, POST /quote, and no-secrets log verification. | 12 tests in @admit/api ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-7.1, A-7.2, A-7.3, A-7.4, A-7.5, A-7.6 | P7: complete shared TypeScript core (@admit/core) with zod schemas, BigInt limits mirroring limits.rs, typed views, change-call builders, code generation & sha256 hash, NEP-366 delegate action signer, amount formatters and explorer URLs. | 25 tests in @admit/core ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-6.1, A-6.3 | P6 Wave 1: implement step/link logging, loadAccounts with zod env validation and key redaction, and extend members fixture to 20 fictional members. | 2 new node tests (2 total scripts tests) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-5.1, A-5.2, A-5.3, A-5.4, A-5.5, A-5.6, A-5.7, A-5.8, A-5.9 | P5 Wave 1: full integration test suite completed across 8 test suites (36 integration tests + 2 smoke tests) with real Sputnik DAO v2 integration, clean clippy and rustfmt. | 168 tests (130 unit + 38 integration) ✅ · pnpm lint ✅ · pnpm test ✅ |
