@@ -13,3 +13,12 @@ async fn contract_initialises() {
         account.contract_state
     );
 }
+
+#[tokio::test]
+async fn token_deploys_and_mints() {
+    let env = common::setup().await;
+    let alice = env.user("alice").await;
+    env.register_storage(&alice).await;
+    env.mint(&alice, 250 * common::TUSDC).await;
+    assert_eq!(env.balance(&alice).await, 250 * common::TUSDC);
+}
