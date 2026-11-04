@@ -1,0 +1,18 @@
+[package]
+name = "admit-pool"
+version = "0.1.0"
+edition = "2021"
+description = "Admit: community pool issuing instant, verifiable hospital-deposit guarantees"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = { workspace = true }
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }
+near-workspaces = { version = "0.24.0", features = ["unstable"] }   # VERIFY with cargo-near toolchain (A-0.5)
+tokio = { version = "1", features = ["full"] }
+serde_json = "1"

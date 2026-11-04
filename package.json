@@ -1,0 +1,30 @@
+{
+  "name": "admit",
+  "private": true,
+  "description": "Instant, verifiable hospital-deposit guarantees from community pools on NEAR",
+  "license": "MIT",
+  "engines": { "node": ">=22", "pnpm": ">=9" },
+  "scripts": {
+    "build": "pnpm build:contract && pnpm -r --filter ./packages/* --filter ./apps/* build",
+    "build:contract": "cargo near build non-reproducible-wasm --manifest-path contracts/admit-pool/Cargo.toml && cargo near build non-reproducible-wasm --manifest-path contracts/mock-ft/Cargo.toml",
+    "test": "pnpm test:contract && pnpm -r test",
+    "check:contract": "cargo check --workspace --target wasm32-unknown-unknown",
+    "test:contract": "pnpm build:contract && cargo test --workspace",
+    "lint": "cargo fmt --all --check && cargo clippy --workspace -- -D warnings && eslint . && tsc -b",
+    "format": "cargo fmt --all && prettier --write .",
+    "dev": "pnpm --parallel --filter @admit/web --filter @admit/api dev",
+    "relayer": "pnpm --filter @admit/api dev",
+    "deploy:testnet": "pnpm --filter @admit/scripts exec tsx deploy-testnet.ts",
+    "seed": "pnpm --filter @admit/scripts exec tsx seed.ts",
+    "demo": "pnpm --filter @admit/scripts exec tsx demo.ts",
+    "simulate": "pnpm --filter @admit/scripts exec tsx simulate.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.1"
+  }
+}

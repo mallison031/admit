@@ -1,0 +1,8 @@
+{
+  "_note": "Fictional demo members for scripts/seed.ts (A-6.3). Names are clearly fake; extend to 20.",
+  "members": [
+    { "label": "Ngozi Demo", "months_paid": 6, "delegates": 1 },
+    { "label": "Tunde Sample", "months_paid": 6, "delegates": 0 },
+    { "label": "New Member Demo", "months_paid": 0, "delegates": 0 }
+  ]
+}

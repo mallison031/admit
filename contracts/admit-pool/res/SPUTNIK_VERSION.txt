@@ -1,0 +1,5 @@
+# Pinned Sputnik DAO v2 wasm (A-0.4) — fill in when the wasm is added:
+source_repo: https://github.com/near-daos/sputnik-dao-contract
+source_commit: TODO
+file: sputnikdao2.wasm
+sha256: TODO
