@@ -120,16 +120,16 @@ Admit is **100% ready** when all of these are true:
 ### P3 — Guarantees
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-3.1 | M | `request_guarantee` Instant tier (eligibility, exposure, reservation, `code_hash`, initials ≤4, `local`) | Tests: issued within limit; reservation increases | A-2.4, A-2.9 | 🟡 | | check_initials implemented with 2 tests; request_guarantee in Wave 2 |
+| A-3.1 | M | `request_guarantee` Instant tier (eligibility, exposure, reservation, `code_hash`, initials ≤4, `local`) | Tests: issued within limit; reservation increases | A-2.4, A-2.9 | ✅ | 2026-11-04 | request_guarantee Instant tier implemented with reservation and events |
 | A-3.2 | M | Council tier: `PendingCouncil`, `council_approve`, `council_reject`; above the tier → rejected | Tests for all three outcomes | A-3.1 | ✅ | 2026-11-04 | council_approve, council_reject implemented with 4 tests |
 | A-3.3 | M | Eligibility denials: tenure, unpaid contributions, `max_active_per_member`, cooldown, Default; Late reduced limit | One named test per denial | A-3.1 | ✅ | 2026-11-04 | check_tenure, check_contributions, check_active_cap, check_cooldown, check_initials implemented with 10 tests |
-| A-3.4 | M | Delegate requests (caller ∈ delegates) | Test; non-delegate rejected | A-3.1 | ⬜ | | |
+| A-3.4 | M | Delegate requests (caller ∈ delegates) | Test; non-delegate rejected | A-3.1 | ✅ | 2026-11-04 | delegate or member can request guarantees |
 | A-3.5 | M | `expire` (only `Issued` past TTL; frees the reservation) | Tests: expires before accept, not after | A-3.1 | ✅ | 2026-11-04 | expire frees reservation and active count with 2 tests |
 | A-3.6 | M | `hospital_accept` (registered hospital only; disables expiry) | Test | A-3.1 | ✅ | 2026-11-04 | hospital_accept sets accepted_at with 2 tests |
 | A-3.7 | M | `hospital_claim` (≤ guarantee; starts dispute window; stores `file_hash`) | Tests incl. claim above guarantee fails | A-3.6 | ✅ | 2026-11-04 | hospital_claim validates amount and sets Claim with 2 tests |
 | A-3.8 | M | `hospital_release` | Test: reservation freed | A-3.6 | ✅ | 2026-11-04 | hospital_release frees reservation and active count with 2 tests |
 | A-3.9 | M | `request_topup` (same tier + exposure checks on new total) | Tests | A-3.1 | ✅ | 2026-11-04 | request_topup checks tier and exposure with 2 tests |
-| A-3.10 | M | `hospital_transfer` (partial claim here + new guarantee at next hospital, same code hash) | Test | A-3.7 | ⬜ | | Cut order #3 |
+| A-3.10 | M | `hospital_transfer` (partial claim here + new guarantee at next hospital, same code hash) | Test | A-3.7 | ✅ | 2026-11-04 | hospital_transfer implemented with partial claim and transfer guarantee |
 | A-3.11 | M | Views: `get_guarantee`, `list_guarantees` | Tests | A-3.1 | ✅ | 2026-11-04 | get_guarantee and list_guarantees with 2 tests |
 
 ### P4 — Settlement, debt, exits
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-04 | A-3.1, A-3.4, A-3.10 | P3 Wave 2 & 3: request_guarantee Instant/Council tiers with delegate check, and hospital_transfer with partial claim. | 10 new unit tests (105 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-3.1, A-3.2, A-3.3, A-3.5, A-3.6, A-3.7, A-3.8, A-3.9, A-3.11 | P3 Wave 1: guarantee eligibility helpers, council approve/reject, expire, hospital accept/claim/release, request_topup, get/list_guarantees views. | 26 new unit tests (95 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-2.4, A-2.8, A-2.11 | P2 Wave 3: limits::limit (Good/Late/Default/debt/reservation), views::get_limit with eligibility checks, ft_on_transfer dispatch and token verification. | 10 new unit tests (69 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-2.4, A-2.6, A-2.7, A-2.8, A-2.9, A-2.10, A-2.11 | P2 Wave 2: create_pool, member join/delegates/internal contributions, council management methods, tenure/good_months limits, get_pool_stats. | 22 new unit tests (59 total) ✅ · pnpm lint ✅ · pnpm test ✅ |
