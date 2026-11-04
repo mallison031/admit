@@ -8,9 +8,12 @@ export interface AdmitConfig {
   tokenDecimals: number;
 }
 
-export const explorerTxUrl = (_network: Network, _txHash: string): string => {
-  throw new Error("not implemented: A-7.6");
+export const explorerTxUrl = (network: Network, txHash: string): string => {
+  const base = network === "mainnet" ? "https://nearblocks.io" : "https://testnet.nearblocks.io";
+  return `${base}/txns/${txHash}`;
 };
-export const explorerAccountUrl = (_network: Network, _accountId: string): string => {
-  throw new Error("not implemented: A-7.6");
+
+export const explorerAccountUrl = (network: Network, accountId: string): string => {
+  const base = network === "mainnet" ? "https://nearblocks.io" : "https://testnet.nearblocks.io";
+  return `${base}/address/${accountId}`;
 };
