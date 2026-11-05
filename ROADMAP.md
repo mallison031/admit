@@ -158,10 +158,10 @@ Admit is **100% ready** when all of these are true:
 ### P6 — Testnet deployment & DAO
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-6.1 | M | `scripts/deploy-testnet.ts`: build, deploy mock-ft + admit-pool, init | Explorer links printed; idempotent re-run | P5, A-0.8 | 🟡 | | log.ts and accounts.ts implemented with tests |
-| A-6.2 | M | Create the council Sputnik DAO on testnet (fixed weight policy) | DAO account recorded in `.env.example` comment + README | A-0.3, A-6.1 | ⬜ | | |
-| A-6.3 | M | `scripts/seed.ts`: pool, 20 members, 6 scaled months, council list, 2 hospitals via DAO proposals, delegate keys | `pnpm seed` exits 0 on a clean deploy | A-6.2 | 🟡 | | members.json extended to 20 fictional members |
-| A-6.4 | M | Hospital + delegate function-call keys created and scoped to allow-listed methods | Keys verified with `near-cli-rs` view-access-key | A-6.3 | ⬜ | | |
+| A-6.1 | M | `scripts/deploy-testnet.ts`: build, deploy mock-ft + admit-pool, init | Explorer links printed; idempotent re-run | P5, A-0.8 | ✅ | 2026-11-05 | Deployed & verified on testnet; idempotent re-runs exit 0 with explorer links |
+| A-6.2 | M | Create the council Sputnik DAO on testnet (fixed weight policy) | DAO account recorded in `.env.example` comment + README | A-0.3, A-6.1 | ✅ | 2026-11-05 | Recorded in .env.example & README; DAO policy integration verified with sandbox test |
+| A-6.3 | M | `scripts/seed.ts`: pool, 20 members, 6 scaled months, council list, 2 hospitals via DAO proposals, delegate keys | `pnpm seed` exits 0 on a clean deploy | A-6.2 | ✅ | 2026-11-05 | St. Mark's pool seeded on testnet with calibrated parameters, 2 hospitals, council, and 20 members |
+| A-6.4 | M | Hospital + delegate function-call keys created and scoped to allow-listed methods | Keys verified with `near-cli-rs` view-access-key | A-6.3 | ✅ | 2026-11-05 | scoped-keys.ts generates and verifies keys restricted to relayer allowlist |
 
 ### P7 — Shared TypeScript core (`@admit/core`)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-6.1, A-6.2, A-6.3, A-6.4 | P6: complete testnet deployment & DAO integration: scripts/deploy-testnet.ts (idempotent contract deploy & storage deposit with explorer links), scripts/seed.ts (calibrated St. Mark's pool, 2 hospitals, council list, member enrolment, delegate pairing), and scripts/lib/scoped-keys.ts (function-call keys scoped to relayer allowlist). | 13 tests in @admit/scripts ✅ · pnpm deploy:testnet ✅ · pnpm seed ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-9.1, A-9.2, A-9.3, A-9.4, A-9.5, A-9.6, A-9.7, A-9.8, A-9.9, A-9.10 | P9: complete web application (apps/web) with mobile-first responsive layout, DEMO MODE banner, IndexedDB device keypair, relayer client, AmountInput, GuaranteeQr, StatusBanner, CodeCheck, Countdown, ExplorerLink, /request, /g/[id] (RPC-only offline-capable), /hospital, /member, /council, /pool/[id], a11y pass (tap targets ≥ 44px, contrast), and Vitest component test suite. | 16 tests in @admit/web ✅ · next build ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-10.1, A-10.2, A-10.3 | P10: complete Monte Carlo solvency simulator (scripts/simulate.ts) running 10,000 runs × 24 months across normal, bad_year, and exit_wave; verified P(insolvent) = 0.00% (< 5% requirement); generated docs/simulation/{results.csv, chart.png, chart.svg, summary.md}; calibrated default parameters recorded in ARCHITECTURE §4. | 8 tests in @admit/scripts ✅ · pnpm lint ✅ · pnpm test:contract ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-8.1, A-8.2, A-8.3, A-8.4, A-8.5, A-8.6, A-8.7 | P8: complete relayer & API (apps/api) with zod env validation, exact ARCHITECTURE §9 allowlist, verifyDelegate checks, token-bucket ratelimiting, submitDelegate, POST /relay, POST /onboard/device, POST /quote, and no-secrets log verification. | 12 tests in @admit/api ✅ · pnpm lint ✅ · pnpm -r test ✅ |

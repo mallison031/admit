@@ -2,6 +2,8 @@
 import { z } from "zod";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import * as os from "node:os";
+import { KeyPair } from "near-api-js";
 
 export const AccountsEnvSchema = z.object({
   NEAR_NETWORK: z.enum(["testnet", "mainnet"]).default("testnet"),
@@ -106,4 +108,26 @@ export const loadAccounts = async (
       };
     },
   });
+};
+
+export const getKeyPair = (
+  accountId: string,
+  cfg?: AccountsConfig,
+): KeyPair => {
+  if (cfg && accountId === cfg.DEPLOYER_ACCOUNT && cfg.DEPLOYER_PRIVATE_KEY) {
+    return KeyPair.fromString(cfg.DEPLOYER_PRIVATE_KEY as Parameters<typeof KeyPair.fromString>[0]);
+  }
+  if (cfg && accountId === cfg.RELAYER_ACCOUNT && cfg.RELAYER_PRIVATE_KEY) {
+    return KeyPair.fromString(cfg.RELAYER_PRIVATE_KEY as Parameters<typeof KeyPair.fromString>[0]);
+  }
+  const network = cfg?.NEAR_NETWORK ?? "testnet";
+  const credPath = path.join(os.homedir(), ".near-credentials", network, `${accountId}.json`);
+  if (fs.existsSync(credPath)) {
+    const raw = JSON.parse(fs.readFileSync(credPath, "utf-8"));
+    const key = raw.private_key || raw.secret_key;
+    if (key) {
+      return KeyPair.fromString(key as Parameters<typeof KeyPair.fromString>[0]);
+    }
+  }
+  throw new Error(`No keypair found for account ${accountId}`);
 };
