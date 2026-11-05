@@ -208,14 +208,14 @@ Admit is **100% ready** when all of these are true:
 ### P11 — Demo script (PRD §8 = acceptance test)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-11.1 | M | `scripts/demo.ts` step 1: seed state check | Logs pool summary | A-6.3 | ⬜ | | |
-| A-11.2 | M | Step 2: delegate (zero NEAR) requests 300 → issued + code | Explorer link printed | A-8.4 | ⬜ | | |
-| A-11.3 | M | Step 3: hospital code check + accept | Expiry disabled verified | A-11.2 | ⬜ | | |
-| A-11.4 | M | Step 4: claim 280, member dispute, council trims 30, paid 250 | Balances asserted | A-11.3 | ⬜ | | |
-| A-11.5 | M | Step 5: debt 250, repay 50, limit +50 | Asserted | A-11.4 | ⬜ | | |
-| A-11.6 | M | Step 6: abuse attempts (new member, 3rd concurrent, 2,000 over tier, relayer off-allow-list) all denied | Each denial asserted with error code | A-11.5 | ⬜ | | |
-| A-11.7 | S | Step 7: run `simulate` summary | Printed | A-10.2 | ⬜ | | |
-| A-11.8 | M | `pnpm demo` exits non-zero on any unexpected state; runs < 5 min | Two consecutive clean runs on a fresh seed | A-11.1–A-11.6 | ⬜ | | |
+| A-11.1 | M | `scripts/demo.ts` step 1: seed state check | Logs pool summary | A-6.3 | ✅ | 2026-11-05 | |
+| A-11.2 | M | Step 2: delegate (zero NEAR) requests 300 → issued + code | Explorer link printed | A-8.4 | ✅ | 2026-11-05 | |
+| A-11.3 | M | Step 3: hospital code check + accept | Expiry disabled verified | A-11.2 | ✅ | 2026-11-05 | |
+| A-11.4 | M | Step 4: claim 280, member dispute, council trims 30, paid 250 | Balances asserted | A-11.3 | ✅ | 2026-11-05 | |
+| A-11.5 | M | Step 5: debt 250, repay 50, limit +50 | Asserted | A-11.4 | ✅ | 2026-11-05 | |
+| A-11.6 | M | Step 6: abuse attempts (new member, 3rd concurrent, 2,000 over tier, relayer off-allow-list) all denied | Each denial asserted with error code | A-11.5 | ✅ | 2026-11-05 | |
+| A-11.7 | S | Step 7: run `simulate` summary | Printed | A-10.2 | ✅ | 2026-11-05 | |
+| A-11.8 | M | `pnpm demo` exits non-zero on any unexpected state; runs < 5 min | Two consecutive clean runs on a fresh seed | A-11.1–A-11.6 | ✅ | 2026-11-05 | |
 
 ### P12 — Optional (Could)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-11.1, A-11.2, A-11.3, A-11.4, A-11.5, A-11.6, A-11.7, A-11.8 | P11: 7-step PRD §8 acceptance test and demo CLI implemented in scripts/demo/{step1..step7}.ts and scripts/demo.ts; verified with two consecutive clean testnet runs (< 5 min) and docs/demo.md generated. | 21 scripts tests ✅ · live testnet demo ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-6.1, A-6.2, A-6.3, A-6.4 | P6: complete testnet deployment & DAO integration: scripts/deploy-testnet.ts (idempotent contract deploy & storage deposit with explorer links), scripts/seed.ts (calibrated St. Mark's pool, 2 hospitals, council list, member enrolment, delegate pairing), and scripts/lib/scoped-keys.ts (function-call keys scoped to relayer allowlist). | 13 tests in @admit/scripts ✅ · pnpm deploy:testnet ✅ · pnpm seed ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-9.1, A-9.2, A-9.3, A-9.4, A-9.5, A-9.6, A-9.7, A-9.8, A-9.9, A-9.10 | P9: complete web application (apps/web) with mobile-first responsive layout, DEMO MODE banner, IndexedDB device keypair, relayer client, AmountInput, GuaranteeQr, StatusBanner, CodeCheck, Countdown, ExplorerLink, /request, /g/[id] (RPC-only offline-capable), /hospital, /member, /council, /pool/[id], a11y pass (tap targets ≥ 44px, contrast), and Vitest component test suite. | 16 tests in @admit/web ✅ · next build ✅ · pnpm lint ✅ · pnpm -r test ✅ |
 | 2026-11-04 | A-10.1, A-10.2, A-10.3 | P10: complete Monte Carlo solvency simulator (scripts/simulate.ts) running 10,000 runs × 24 months across normal, bad_year, and exit_wave; verified P(insolvent) = 0.00% (< 5% requirement); generated docs/simulation/{results.csv, chart.png, chart.svg, summary.md}; calibrated default parameters recorded in ARCHITECTURE §4. | 8 tests in @admit/scripts ✅ · pnpm lint ✅ · pnpm test:contract ✅ · pnpm -r test ✅ |
