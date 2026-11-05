@@ -226,10 +226,10 @@ Admit is **100% ready** when all of these are true:
 ### P13 — Documentation, deployment, submission
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-13.1 | M | README: problem + sources, how it works, architecture diagram | Reviewed against PRD §1 | P11 | ⬜ | | |
-| A-13.2 | M | README: "do X, see Y" quickstart (clone → install → test → seed → demo → open QR page) | A-14.2 passes using only these steps | A-11.8 | ⬜ | | |
-| A-13.3 | M | README: limitations (insurance classification, fiat cash-out, hospital adoption), threat model summary | Matches ARCHITECTURE §11 | A-13.1 | ⬜ | | |
-| A-13.4 | M | README: library list + AI-generated code disclosure (hackathon rule), no AI attribution in git history | Present | A-13.1 | ⬜ | | |
+| A-13.1 | M | README: problem + sources, how it works, architecture diagram | Reviewed against PRD §1 | P11 | ✅ | 2026-11-05 | |
+| A-13.2 | M | README: "do X, see Y" quickstart (clone → install → test → seed → demo → open QR page) | A-14.2 passes using only these steps | A-11.8 | ✅ | 2026-11-05 | |
+| A-13.3 | M | README: limitations (insurance classification, fiat cash-out, hospital adoption), threat model summary | Matches ARCHITECTURE §11 | A-13.1 | ✅ | 2026-11-05 | |
+| A-13.4 | M | README: library list + AI-generated code disclosure (hackathon rule), no AI attribution in git history | Present | A-13.1 | ✅ | 2026-11-05 | |
 | A-13.5 | M | README: name the second project if the user enters two (hackathon rule) | Present or N/A noted | user decision | ⬜ | | |
 | A-13.6 | M | Deploy web to Vercel (testnet config) | Public URL works on a phone | P9 | ⬜ | | Ask before deploying |
 | A-13.7 | M | Screenshots + simulation chart in README | Present | A-13.6, A-10.2 | ⬜ | | |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-13.1, A-13.2, A-13.3, A-13.4 | P13: write comprehensive README.md with sourced problem context (Nigeria & global emergency deposit crisis), 5-step 2:04 AM flow with Mermaid architecture diagram, 'do X, see Y' quickstart guide, limitations & threat model summary, library list and hackathon AI disclosure. | README.md verified against PRD §1 and ARCHITECTURE §11 |
 | 2026-11-05 | A-12.1 | P12: implement NEAR AI Cloud TDX attestation verification (scripts/verify-attestation.ts), advisory review API (/ai/review with cited reference list and on-chain post_ai_review), contract post_ai_review and set_ai_reviewer methods, and AiReviewPanel component on /council. | 18 API tests ✅ · 28 scripts tests ✅ · 20 web tests ✅ · 133 contract tests ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-12.2 | P12: implement 1Click cross-chain top-up quote component on /member with multi-chain selector (Ethereum, Arbitrum, Base, Solana) and live dry-run quote from POST /quote. | 18 tests in @admit/web ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-11.1, A-11.2, A-11.3, A-11.4, A-11.5, A-11.6, A-11.7, A-11.8 | P11: 7-step PRD §8 acceptance test and demo CLI implemented in scripts/demo/{step1..step7}.ts and scripts/demo.ts; verified with two consecutive clean testnet runs (< 5 min) and docs/demo.md generated. | 21 scripts tests ✅ · live testnet demo ✅ · pnpm lint ✅ |
