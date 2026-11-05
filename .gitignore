@@ -19,6 +19,7 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+.taste-skill/
 
 # Next.js generated
 next-env.d.ts

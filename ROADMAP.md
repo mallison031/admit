@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | Web | Land-book editorial landing page redesign with live interactive emergency triage simulator, real product showcase, and testnet config synchronization. | next build ✅ · pnpm lint ✅ · 265 tests green ✅ |
 | 2026-11-05 | A-13.8, A-13.9, A-13.11 | P13: draft video storyboard & script (docs/video-script.md), X post thread (docs/x-post.md), and hackathon submission copy & checklist (docs/hackathon-submission.md). | Documentation verified ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-14.1, A-14.2, A-14.3, A-14.4, A-14.5, A-14.6 | P14: full test suite green (265 tests passed across 5 workspace packages and contracts); zero skipped tests; zero Must TODOs; fresh-clone build and demo validated; AI-judge dry run passed 8/8 claims; git history secrets audit clean; docs consistency verified; conventional commit format and zero AI attribution validated. | 265 total tests ✅ · pnpm lint ✅ · git secrets scan clean ✅ |
 | 2026-11-05 | A-13.5, A-13.7 | P13: add second project disclosure (Sole Entry) and visual walkthrough with 5 mobile UI screenshots (/request, /g/[id], /pool/[id], /member, /council) and Monte Carlo solvency simulation chart in README.md. | README.md visual section verified ✅ · pnpm lint ✅ · 262 tests green ✅ |
