@@ -1,7 +1,7 @@
 # Admit Acceptance Test & 2:04 AM Demo Walkthrough
 
-Generated on: 2026-11-05T09:04:25.173Z
-Runtime: 2.1 seconds
+Generated on: 2026-11-05T09:55:56.736Z
+Runtime: 0.1 seconds
 Contract: [`pool.admit-hack-6711fd.testnet`](https://testnet.nearblocks.io/address/pool.admit-hack-6711fd.testnet)
 Token: [`tusdc.admit-hack-6711fd.testnet`](https://testnet.nearblocks.io/address/tusdc.admit-hack-6711fd.testnet)
 

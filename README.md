@@ -3,6 +3,7 @@
 **Instant hospital-deposit guarantees from community pools on NEAR — so emergency treatment starts before anyone pays.**
 
 > Track: **Social Money** (Primary) · Real-World Money · Privacy & Private AI (Optional AI Module)  
+> Multi-Project Disclosure: **N/A (Sole Entry)** — Admit is submitted as a standalone project entry.  
 > Live plan and task tracking: [`ROADMAP.md`](ROADMAP.md) · Architecture: [`ARCHITECTURE.md`](ARCHITECTURE.md) · Essentials: [`ARCHITECTURE_ESSENTIALS.md`](ARCHITECTURE_ESSENTIALS.md)
 
 ---
@@ -57,7 +58,21 @@ The system operates in 5 clear stages:
 
 ---
 
-## 3. Quickstart — Do X, See Y
+## 3. Visual Walkthrough & UI Screenshots
+
+| 2:04 AM Emergency Request | Hospital QR Verification & Intake | Community Pool Dashboard |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/request.png" alt="Emergency Guarantee Request" width="260" /> | <img src="docs/screenshots/guarantee.png" alt="Hospital QR Intake" width="260" /> | <img src="docs/screenshots/pool.png" alt="Community Pool Dashboard" width="260" /> |
+| *Member triggers instant $300 guarantee from mobile with 0 NEAR* | *Triage nurse enters 6-char code; zero wallet required* | *Real-time pool balance, exposure cap, and active guarantees* |
+
+| Member Credit & 1Click Top-Up | Council Dispute Audit & AI Review | Monte Carlo Solvency Simulation |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/member.png" alt="Member Credit & Top-Up" width="260" /> | <img src="docs/screenshots/council.png" alt="Council Dispute Audit" width="260" /> | <img src="docs/simulation/chart.png" alt="Monte Carlo Solvency Simulation" width="260" /> |
+| *Revolving credit recovery + cross-chain 1Click deposits* | *Advisory TDX TEE medical bill review & trim* | *10,000-run Monte Carlo simulation: 0.00% insolvency* |
+
+---
+
+## 4. Quickstart — Do X, See Y
 
 Follow these steps to run the complete workspace locally and execute the live testnet acceptance suite:
 
@@ -106,7 +121,7 @@ pnpm --filter @admit/web dev
 
 ---
 
-## 4. Limitations & Threat Model Summary
+## 5. Limitations & Threat Model Summary
 
 ### Design & Regulatory Limitations
 - **Mutual-Aid Credit Line, Not Insurance:** Admit operates as a community mutual-aid credit facility with revolving credit limits and member repayments. The community reserve absorbs claims only upon certified death (`report_death`) or explicit council write-off (`council_write_off`). Real-world deployments require formal legal structuring under local mutual aid or credit cooperative frameworks (e.g., NAICOM regulations in Nigeria).
@@ -119,12 +134,12 @@ pnpm --filter @admit/web dev
 | **Hit-and-Run Claims** | Brand-new member requests maximum guarantee and leaves. | Enforces `min_tenure_months` + contribution history (`E07_TENURE_TOO_SHORT`, `E08_CONTRIBUTIONS_UNPAID`). |
 | **Serial Claim Abuse** | Member initiates multiple large claims concurrently. | Enforces `max_active_guarantees` cap (2) and mandatory cooldown period (`E09_TOO_MANY_ACTIVE`, `E10_COOLDOWN`). |
 | **Inflated Hospital Bills** | Clinic charges exorbitant rates for emergency procedures. | Claim cannot exceed guarantee (`E15`); mandatory member dispute window (`E16`); advisory TEE benchmark review; council adjustment authority. |
-| **Run on the Pool** | Multiple concurrent emergencies drain pool reserves. | Strict pool exposure cap: `reserved + amount <= pool_balance * max_exposure_bps` (`E13_EXPOSURE_CAP`). Verified solvent ($P < 5\%$) across 10,000 Monte Carlo runs. |
+| **Run on the Pool** | Multiple concurrent emergencies drain pool reserves. | Strict pool exposure cap: `reserved + amount <= pool_balance * max_exposure_bps` (`E13_EXPOSURE_CAP`). Verified solvent ($P < 5\%$) across 10,000 Monte Carlo runs (see `docs/simulation/summary.md`). |
 | **Key Theft / Compromise** | Stolen delegate or hospital device key executes unauthorized calls. | Function-call keys restricted strictly to relayer allowlist (`request_guarantee`, `hospital_accept`, `hospital_claim`, etc.). Full access keys never stored on client devices. |
 
 ---
 
-## 5. Libraries & Technology Stack
+## 6. Libraries & Technology Stack
 
 Every dependency was vetted against NEAR testnet/mainnet compatibility:
 
@@ -147,7 +162,7 @@ Per NEAR Hackathon rules regarding AI-assisted development:
 
 ---
 
-## 6. Contributing & Repository Structure
+## 7. Contributing & Repository Structure
 
 - Codebase follows the project structure documented in [`project_structure.md`](project_structure.md).
 - Architectural invariants are detailed in [`ARCHITECTURE.md`](ARCHITECTURE.md) and [`ARCHITECTURE_ESSENTIALS.md`](ARCHITECTURE_ESSENTIALS.md).
@@ -156,6 +171,6 @@ Per NEAR Hackathon rules regarding AI-assisted development:
 
 ---
 
-## 7. License
+## 8. License
 
 MIT License — see [`LICENSE`](LICENSE).

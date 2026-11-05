@@ -30,31 +30,47 @@ describe("OneClickDeposit component", () => {
   });
 
   it("fetches quote and reveals quote card upon clicking Get Quote", async () => {
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const root = createRoot(container);
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(
+        JSON.stringify({
+          quoteId: "dry_quote_test123",
+          amountIn: "50000000",
+          amountOut: "49850000",
+          minAmountOut: "49700000",
+          estimatedTimeSeconds: 15,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      )) as unknown as typeof fetch;
 
-    await act(async () => {
-      root.render(<OneClickDeposit memberAccount="member1.testnet" />);
-    });
+    try {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = createRoot(container);
 
-    const quoteBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Get Quote"),
-    );
-    expect(quoteBtn).toBeDefined();
+      await act(async () => {
+        root.render(<OneClickDeposit memberAccount="member1.testnet" />);
+      });
 
-    await act(async () => {
-      quoteBtn?.click();
-      await new Promise((r) => setTimeout(r, 50));
-    });
+      const quoteBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("Get Quote"),
+      );
+      expect(quoteBtn).toBeDefined();
 
-    // Check that quote route card appeared
-    expect(container.textContent).toContain("1Click Defuse Route");
-    expect(container.textContent).toContain("You Pay");
-    expect(container.textContent).toContain("You Receive");
-    expect(container.textContent).toContain("Deposit via 1Click (Dry-Run)");
+      await act(async () => {
+        quoteBtn?.click();
+      });
 
-    root.unmount();
-    container.remove();
+      // Check that quote route card appeared
+      expect(container.textContent).toContain("1Click Defuse Route");
+      expect(container.textContent).toContain("You Pay");
+      expect(container.textContent).toContain("You Receive");
+      expect(container.textContent).toContain("Deposit via 1Click (Dry-Run)");
+
+      root.unmount();
+      container.remove();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });
