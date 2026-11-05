@@ -6,6 +6,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { AmountInput } from "../../components/AmountInput";
 import { ExplorerLink } from "../../components/ExplorerLink";
+import { OneClickDeposit } from "../../components/OneClickDeposit";
 import { getContractId, getNetwork, getViewClient } from "../../lib/config";
 import { getWalletSelector } from "../../lib/wallet";
 
@@ -234,6 +235,14 @@ export default function MemberPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* 1Click Any-Chain Top-Up (Could / A-12.2) */}
+      <div className="mb-5">
+        <OneClickDeposit
+          memberAccount={memberAccount}
+          onSuccessMessage={setActionMessage}
+        />
       </div>
 
       {/* Family Delegate Device Pairing */}

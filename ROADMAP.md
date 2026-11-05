@@ -221,7 +221,7 @@ Admit is **100% ready** when all of these are true:
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
 | A-12.1 | C | AI bill check: NEAR AI Cloud attestation + completion + signature verification, cited reference list, advisory panel | Verified panel renders; `post_ai_review` stores result | All M done | ⬜ | | Cut order #1 |
-| A-12.2 | C | 1Click any-chain top-up UI (dry-run quote) | Quote shown on `/member` | A-8.7 | ⬜ | | Cut order #1 |
+| A-12.2 | C | 1Click any-chain top-up UI (dry-run quote) | Quote shown on `/member` | A-8.7 | ✅ | 2026-11-05 | |
 
 ### P13 — Documentation, deployment, submission
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-12.2 | P12: implement 1Click cross-chain top-up quote component on /member with multi-chain selector (Ethereum, Arbitrum, Base, Solana) and live dry-run quote from POST /quote. | 18 tests in @admit/web ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-11.1, A-11.2, A-11.3, A-11.4, A-11.5, A-11.6, A-11.7, A-11.8 | P11: 7-step PRD §8 acceptance test and demo CLI implemented in scripts/demo/{step1..step7}.ts and scripts/demo.ts; verified with two consecutive clean testnet runs (< 5 min) and docs/demo.md generated. | 21 scripts tests ✅ · live testnet demo ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-6.1, A-6.2, A-6.3, A-6.4 | P6: complete testnet deployment & DAO integration: scripts/deploy-testnet.ts (idempotent contract deploy & storage deposit with explorer links), scripts/seed.ts (calibrated St. Mark's pool, 2 hospitals, council list, member enrolment, delegate pairing), and scripts/lib/scoped-keys.ts (function-call keys scoped to relayer allowlist). | 13 tests in @admit/scripts ✅ · pnpm deploy:testnet ✅ · pnpm seed ✅ · pnpm lint ✅ · pnpm test ✅ |
 | 2026-11-04 | A-9.1, A-9.2, A-9.3, A-9.4, A-9.5, A-9.6, A-9.7, A-9.8, A-9.9, A-9.10 | P9: complete web application (apps/web) with mobile-first responsive layout, DEMO MODE banner, IndexedDB device keypair, relayer client, AmountInput, GuaranteeQr, StatusBanner, CodeCheck, Countdown, ExplorerLink, /request, /g/[id] (RPC-only offline-capable), /hospital, /member, /council, /pool/[id], a11y pass (tap targets ≥ 44px, contrast), and Vitest component test suite. | 16 tests in @admit/web ✅ · next build ✅ · pnpm lint ✅ · pnpm -r test ✅ |
