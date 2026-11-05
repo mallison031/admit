@@ -233,10 +233,10 @@ Admit is **100% ready** when all of these are true:
 | A-13.5 | M | README: name the second project if the user enters two (hackathon rule) | Present or N/A noted | user decision | ✅ | 2026-11-05 | N/A (Sole Entry) noted in README |
 | A-13.6 | M | Deploy web to Vercel (testnet config) | Public URL works on a phone | P9 | ⬜ | | Ask before deploying |
 | A-13.7 | M | Screenshots + simulation chart in README | Present | A-13.6, A-10.2 | ✅ | 2026-11-05 | 5 mobile UI screenshots and Monte Carlo chart embedded in README |
-| A-13.8 | M | Demo video (2am story, ≤ 2 min) | File ready for user review | A-11.8, A-13.6 | ⬜ | | |
-| A-13.9 | M | X post draft (built at NEAR HACKATHON, @NEARProtocol, #NEARHackathon, video) | Draft approved by user; **posted only with explicit OK** | A-13.8 | ⬜ | | |
+| A-13.8 | M | Demo video (2am story, ≤ 2 min) | File ready for user review | A-11.8, A-13.6 | 🟡 | | Storyboard and script ready in docs/video-script.md |
+| A-13.9 | M | X post draft (built at NEAR HACKATHON, @NEARProtocol, #NEARHackathon, video) | Draft approved by user; **posted only with explicit OK** | A-13.8 | 🟡 | | Draft prepared in docs/x-post.md; awaiting maintainer approval |
 | A-13.10 | M | Make repo public | **Only with explicit OK** | A-14.4 | ✅ | 2026-11-04 | made public on user's explicit OK (2026-11-04); secrets scan clean |
-| A-13.11 | M | Submit hackathon form (repo URL, post URL, wallet, description 20–2,000 chars) | **Only with explicit OK**; submissions can't be edited | A-13.9, A-13.10 | ⬜ | | Target 14 Nov 18:00 UTC |
+| A-13.11 | M | Submit hackathon form (repo URL, post URL, wallet, description 20–2,000 chars) | **Only with explicit OK**; submissions can't be edited | A-13.9, A-13.10 | 🟡 | | Target 14 Nov 18:00 UTC; submission copy ready in docs/hackathon-submission.md |
 
 ### P14 — Final QA
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-13.8, A-13.9, A-13.11 | P13: draft video storyboard & script (docs/video-script.md), X post thread (docs/x-post.md), and hackathon submission copy & checklist (docs/hackathon-submission.md). | Documentation verified ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-14.1, A-14.2, A-14.3, A-14.4, A-14.5, A-14.6 | P14: full test suite green (265 tests passed across 5 workspace packages and contracts); zero skipped tests; zero Must TODOs; fresh-clone build and demo validated; AI-judge dry run passed 8/8 claims; git history secrets audit clean; docs consistency verified; conventional commit format and zero AI attribution validated. | 265 total tests ✅ · pnpm lint ✅ · git secrets scan clean ✅ |
 | 2026-11-05 | A-13.5, A-13.7 | P13: add second project disclosure (Sole Entry) and visual walkthrough with 5 mobile UI screenshots (/request, /g/[id], /pool/[id], /member, /council) and Monte Carlo solvency simulation chart in README.md. | README.md visual section verified ✅ · pnpm lint ✅ · 262 tests green ✅ |
 | 2026-11-05 | A-13.1, A-13.2, A-13.3, A-13.4 | P13: write comprehensive README.md with sourced problem context (Nigeria & global emergency deposit crisis), 5-step 2:04 AM flow with Mermaid architecture diagram, 'do X, see Y' quickstart guide, limitations & threat model summary, library list and hackathon AI disclosure. | README.md verified against PRD §1 and ARCHITECTURE §11 |
