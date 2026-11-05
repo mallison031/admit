@@ -5,6 +5,7 @@ import { serve } from "@hono/node-server";
 import { relay } from "./routes/relay.js";
 import { onboard } from "./routes/onboard.js";
 import { quote } from "./routes/quote.js";
+import { ai } from "./routes/ai.js";
 import { loadEnv } from "./env.js";
 
 export const app = new Hono();
@@ -12,6 +13,7 @@ app.get("/health", (c) => c.json({ ok: true }));
 app.route("/relay", relay);
 app.route("/onboard", onboard);
 app.route("/quote", quote);
+app.route("/ai", ai);
 
 // Start server when executed directly as entrypoint
 const isMain =

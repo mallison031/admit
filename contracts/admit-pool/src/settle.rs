@@ -7,7 +7,7 @@ use crate::access;
 use crate::errors::{
     E01_POOL_NOT_FOUND, E03_NOT_COUNCIL, E14_INVALID_STATUS, E15_CLAIM_EXCEEDS_GUARANTEE,
     E16_DISPUTE_WINDOW_OPEN, E17_DISPUTE_WINDOW_CLOSED, E23_GUARANTEE_NOT_FOUND,
-    E24_MEMBER_NOT_FOUND,
+    E24_MEMBER_NOT_FOUND, E27_NOT_AI_REVIEWER,
 };
 use crate::events::{self, AdmitEvent};
 use crate::time;
@@ -217,8 +217,31 @@ impl Contract {
 
     /// Could (A-12.1). Only `ai_reviewer` (E27). Advisory only.
     pub fn post_ai_review(&mut self, guarantee_id: GuaranteeId, review: AiReview) {
-        let _ = (guarantee_id, review);
-        todo!("A-12.1")
+        let caller = env::predecessor_account_id();
+        if self.ai_reviewer.as_ref() != Some(&caller) {
+            env::panic_str(E27_NOT_AI_REVIEWER);
+        }
+
+        let mut guarantee = self
+            .guarantees
+            .get(&guarantee_id)
+            .cloned()
+            .unwrap_or_else(|| env::panic_str(E23_GUARANTEE_NOT_FOUND));
+
+        if guarantee.status != GStatus::Claimed && guarantee.status != GStatus::Disputed {
+            env::panic_str(E14_INVALID_STATUS);
+        }
+
+        let mut claim = guarantee
+            .claim
+            .take()
+            .unwrap_or_else(|| env::panic_str(E14_INVALID_STATUS));
+
+        claim.ai_review = Some(review);
+        guarantee.claim = Some(claim);
+        self.guarantees.insert(guarantee_id, guarantee);
+
+        events::emit(AdmitEvent::AiReviewPosted { guarantee_id });
     }
 }
 
@@ -232,6 +255,7 @@ mod tests {
     use near_sdk::json_types::U64;
     use near_sdk::test_utils::VMContextBuilder;
     use near_sdk::testing_env;
+    use near_sdk::AccountId;
 
     #[test]
     fn settlement_split_normal() {
@@ -580,5 +604,96 @@ mod tests {
         let updated_g = contract.get_guarantee(0).unwrap();
         assert_eq!(updated_g.status, GStatus::Settled);
         assert_eq!(updated_g.claim.unwrap().paid.0, 80_000_000);
+    }
+
+    #[test]
+    fn post_ai_review_happy_path() {
+        let ai_acc: AccountId = "ai.near".parse().unwrap();
+        let mut contract = Contract::new(Some(ai_acc.clone()));
+        let mut g = guarantee(0, GStatus::Claimed);
+        g.claim = Some(Claim {
+            amount: U128(100_000_000),
+            file_hash: [1u8; 32],
+            claimed_at: U64(1_000),
+            dispute: None,
+            adjustment: U128(0),
+            adjustment_reason: None,
+            paid: U128(0),
+            ai_review: None,
+        });
+        insert_guarantee(&mut contract, g);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id(ai_acc.clone())
+            .block_timestamp(1_500)
+            .build());
+
+        let review = AiReview {
+            verdict: "MATCH".to_string(),
+            flagged_lines: 0,
+            report_hash: [2u8; 32],
+            signing_address: "0x1234567890abcdef".to_string(),
+        };
+
+        contract.post_ai_review(0, review.clone());
+
+        let updated = contract.get_guarantee(0).unwrap();
+        assert_eq!(updated.claim.unwrap().ai_review, Some(review));
+    }
+
+    #[test]
+    #[should_panic(expected = "E27_NOT_AI_REVIEWER")]
+    fn post_ai_review_rejects_unauthorized() {
+        let mut contract = Contract::new(Some("ai.near".parse().unwrap()));
+        let mut g = guarantee(0, GStatus::Claimed);
+        g.claim = Some(Claim {
+            amount: U128(100_000_000),
+            file_hash: [1u8; 32],
+            claimed_at: U64(1_000),
+            dispute: None,
+            adjustment: U128(0),
+            adjustment_reason: None,
+            paid: U128(0),
+            ai_review: None,
+        });
+        insert_guarantee(&mut contract, g);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id("attacker.near".parse().unwrap())
+            .build());
+
+        let review = AiReview {
+            verdict: "MATCH".to_string(),
+            flagged_lines: 0,
+            report_hash: [2u8; 32],
+            signing_address: "0x1234567890abcdef".to_string(),
+        };
+
+        contract.post_ai_review(0, review);
+    }
+
+    #[test]
+    #[should_panic(expected = "E14_INVALID_STATUS")]
+    fn post_ai_review_rejects_non_claim_status() {
+        let ai_acc: AccountId = "ai.near".parse().unwrap();
+        let mut contract = Contract::new(Some(ai_acc.clone()));
+        let g = guarantee(0, GStatus::Accepted);
+        insert_guarantee(&mut contract, g);
+
+        testing_env!(VMContextBuilder::new()
+            .current_account_id("pool.near".parse().unwrap())
+            .predecessor_account_id(ai_acc)
+            .build());
+
+        let review = AiReview {
+            verdict: "MATCH".to_string(),
+            flagged_lines: 0,
+            report_hash: [2u8; 32],
+            signing_address: "0x1234567890abcdef".to_string(),
+        };
+
+        contract.post_ai_review(0, review);
     }
 }

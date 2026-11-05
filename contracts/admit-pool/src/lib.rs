@@ -23,7 +23,7 @@ pub mod views;
 #[cfg(test)]
 pub mod test_utils;
 
-use errors::{E01_POOL_NOT_FOUND, E20_WRONG_TOKEN, E29_INVALID_MESSAGE};
+use errors::{E01_POOL_NOT_FOUND, E20_WRONG_TOKEN, E27_NOT_AI_REVIEWER, E29_INVALID_MESSAGE};
 use types::{FtMessage, Guarantee, GuaranteeId, Member, Pool, PoolId};
 
 #[near(serializers = [borsh])]
@@ -61,6 +61,24 @@ impl Contract {
             next_pool_id: 0,
             next_guarantee_id: 0,
         }
+    }
+
+    /// Returns the active AI reviewer account, if configured (Could, A-12.1).
+    pub fn get_ai_reviewer(&self) -> Option<AccountId> {
+        self.ai_reviewer.clone()
+    }
+
+    /// Sets or updates the AI reviewer account. Callable by pool DAOs, the contract itself, or current reviewer.
+    pub fn set_ai_reviewer(&mut self, reviewer: Option<AccountId>) {
+        let caller = env::predecessor_account_id();
+        let is_dao = self.pools.iter().any(|(_, pool)| pool.dao == caller);
+        let is_current = self.ai_reviewer.as_ref() == Some(&caller);
+        let is_self = caller == env::current_account_id();
+
+        if !is_dao && !is_current && !is_self {
+            env::panic_str(E27_NOT_AI_REVIEWER);
+        }
+        self.ai_reviewer = reviewer;
     }
 
     /// NEP-141 receiver. `msg` = `{"contribute": pool_id}` | `{"repay": pool_id}` | `{"topup": pool_id}`.
