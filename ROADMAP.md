@@ -230,9 +230,9 @@ Admit is **100% ready** when all of these are true:
 | A-13.2 | M | README: "do X, see Y" quickstart (clone → install → test → seed → demo → open QR page) | A-14.2 passes using only these steps | A-11.8 | ✅ | 2026-11-05 | |
 | A-13.3 | M | README: limitations (insurance classification, fiat cash-out, hospital adoption), threat model summary | Matches ARCHITECTURE §11 | A-13.1 | ✅ | 2026-11-05 | |
 | A-13.4 | M | README: library list + AI-generated code disclosure (hackathon rule), no AI attribution in git history | Present | A-13.1 | ✅ | 2026-11-05 | |
-| A-13.5 | M | README: name the second project if the user enters two (hackathon rule) | Present or N/A noted | user decision | ⬜ | | |
+| A-13.5 | M | README: name the second project if the user enters two (hackathon rule) | Present or N/A noted | user decision | ✅ | 2026-11-05 | N/A (Sole Entry) noted in README |
 | A-13.6 | M | Deploy web to Vercel (testnet config) | Public URL works on a phone | P9 | ⬜ | | Ask before deploying |
-| A-13.7 | M | Screenshots + simulation chart in README | Present | A-13.6, A-10.2 | ⬜ | | |
+| A-13.7 | M | Screenshots + simulation chart in README | Present | A-13.6, A-10.2 | ✅ | 2026-11-05 | 5 mobile UI screenshots and Monte Carlo chart embedded in README |
 | A-13.8 | M | Demo video (2am story, ≤ 2 min) | File ready for user review | A-11.8, A-13.6 | ⬜ | | |
 | A-13.9 | M | X post draft (built at NEAR HACKATHON, @NEARProtocol, #NEARHackathon, video) | Draft approved by user; **posted only with explicit OK** | A-13.8 | ⬜ | | |
 | A-13.10 | M | Make repo public | **Only with explicit OK** | A-14.4 | ✅ | 2026-11-04 | made public on user's explicit OK (2026-11-04); secrets scan clean |
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-13.5, A-13.7 | P13: add second project disclosure (Sole Entry) and visual walkthrough with 5 mobile UI screenshots (/request, /g/[id], /pool/[id], /member, /council) and Monte Carlo solvency simulation chart in README.md. | README.md visual section verified ✅ · pnpm lint ✅ · 262 tests green ✅ |
 | 2026-11-05 | A-13.1, A-13.2, A-13.3, A-13.4 | P13: write comprehensive README.md with sourced problem context (Nigeria & global emergency deposit crisis), 5-step 2:04 AM flow with Mermaid architecture diagram, 'do X, see Y' quickstart guide, limitations & threat model summary, library list and hackathon AI disclosure. | README.md verified against PRD §1 and ARCHITECTURE §11 |
 | 2026-11-05 | A-12.1 | P12: implement NEAR AI Cloud TDX attestation verification (scripts/verify-attestation.ts), advisory review API (/ai/review with cited reference list and on-chain post_ai_review), contract post_ai_review and set_ai_reviewer methods, and AiReviewPanel component on /council. | 18 API tests ✅ · 28 scripts tests ✅ · 20 web tests ✅ · 133 contract tests ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-12.2 | P12: implement 1Click cross-chain top-up quote component on /member with multi-chain selector (Ethereum, Arbitrum, Base, Solana) and live dry-run quote from POST /quote. | 18 tests in @admit/web ✅ · pnpm lint ✅ |

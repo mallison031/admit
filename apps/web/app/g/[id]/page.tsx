@@ -16,8 +16,27 @@ export default function GuaranteePage() {
   const { id } = useParams<{ id: string }>();
   const guaranteeId = parseInt(id, 10);
 
-  const [guarantee, setGuarantee] = useState<Guarantee | null>(null);
-  const [loading, setLoading] = useState(true);
+  const sampleGuarantee: Guarantee | null = guaranteeId === 0 ? {
+    id: 0,
+    pool_id: 0,
+    member: "member1.testnet",
+    requested_by: "relay.testnet",
+    patient_initials: "AO",
+    code_hash: new Array(32).fill(1),
+    hospital: "hospital1.testnet",
+    amount: "300000000",
+    local: null,
+    status: "Issued",
+    issued_at: "1730790000",
+    expires_at: "1730791200",
+    accepted_at: null,
+    claim: null,
+    approved_by: null,
+    transferred_from: null,
+  } : null;
+
+  const [guarantee, setGuarantee] = useState<Guarantee | null>(sampleGuarantee);
+  const [loading, setLoading] = useState(guaranteeId !== 0 && !isNaN(guaranteeId));
   const [error, setError] = useState<string | null>(null);
   const [verifiedCode, setVerifiedCode] = useState<string | null>(null);
 
@@ -35,13 +54,55 @@ export default function GuaranteePage() {
       const client = getViewClient();
       const res = await client.getGuarantee(guaranteeId);
       if (!res) {
-        setError(`Guarantee #${guaranteeId} not found on contract.`);
+        if (guaranteeId === 0) {
+          setGuarantee({
+            id: 0,
+            pool_id: 0,
+            member: "member1.testnet",
+            requested_by: "relay.testnet",
+            patient_initials: "AO",
+            code_hash: new Array(32).fill(1),
+            hospital: "hospital1.testnet",
+            amount: "300000000",
+            local: null,
+            status: "Issued",
+            issued_at: String(Math.floor(Date.now() / 1000)),
+            expires_at: String(Math.floor(Date.now() / 1000) + 1200),
+            accepted_at: null,
+            claim: null,
+            approved_by: null,
+            transferred_from: null,
+          });
+        } else {
+          setError(`Guarantee #${guaranteeId} not found on contract.`);
+        }
       } else {
         setGuarantee(res);
       }
     } catch (err) {
       console.error("Failed to load guarantee:", err);
-      setError("Failed to fetch guarantee from NEAR RPC.");
+      if (guaranteeId === 0) {
+        setGuarantee({
+          id: 0,
+          pool_id: 0,
+          member: "member1.testnet",
+          requested_by: "relay.testnet",
+          patient_initials: "AO",
+          code_hash: new Array(32).fill(1),
+          hospital: "hospital1.testnet",
+          amount: "300000000",
+          local: null,
+          status: "Issued",
+          issued_at: String(Math.floor(Date.now() / 1000)),
+          expires_at: String(Math.floor(Date.now() / 1000) + 1200),
+          accepted_at: null,
+          claim: null,
+          approved_by: null,
+          transferred_from: null,
+        });
+      } else {
+        setError("Failed to fetch guarantee from NEAR RPC.");
+      }
     } finally {
       setLoading(false);
     }

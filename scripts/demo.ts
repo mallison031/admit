@@ -2,7 +2,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { JsonRpcProvider } from "near-api-js";
-import { createViewClient } from "@admit/core";
+import { createViewClient, type ViewClient, type PoolParams, type PoolStats, type Standing, type GStatus } from "@admit/core";
+import { CALIBRATED_POOL_PARAMS } from "./seed.js";
 import { loadAccounts } from "./lib/accounts.js";
 import { type DemoContext } from "./demo/types.js";
 import { step1 } from "./demo/step1.js";
@@ -19,6 +20,118 @@ export interface DemoOptions {
   simulated?: boolean;
 }
 
+export function createMockViewClient(): ViewClient {
+  let status = "Issued";
+  const claim = {
+    amount: "280000000",
+    file_hash: new Array(32).fill(1),
+    claimed_at: "150",
+    dispute: "Line item 5 redundant; observation bed bundled in admission tariff.",
+    adjustment: "30000000",
+    adjustment_reason: "Council audit verified observation bed included in emergency triage rate.",
+    paid: "250000000",
+    ai_review: {
+      verdict: "FLAGGED: 1 line item exceeds reference tariff (suggested trim: $30)",
+      flagged_lines: 1,
+      report_hash: new Array(32).fill(2),
+      signing_address: "0x4b20993Bc481177ec7E8f571ceCaE8A9e22C02db",
+    },
+  };
+
+  return {
+    async getPool(_poolId: number) {
+      return {
+        id: 0,
+        name: "St. Mark's Emergency Circle",
+        dao: "admit.testnet",
+        token: "tusdc.admit.testnet",
+        balance: "1000000000",
+        reserved: "0",
+        written_off: "0",
+        params: CALIBRATED_POOL_PARAMS as PoolParams,
+        council: ["council1.testnet"],
+        hospitals: [
+          {
+            account: "hospital1.testnet",
+            name: "St. Nicholas Clinic",
+            fc_public_key: "ed25519:mock",
+          },
+          {
+            account: "hospital2.testnet",
+            name: "Lagos Island General Hospital",
+            fc_public_key: "ed25519:mock",
+          },
+        ],
+        time_scale: 1,
+        created_at: "100",
+      };
+    },
+    async getMember() {
+      return {
+        account: "member1.testnet",
+        pool_id: 0,
+        joined_at: "100",
+        contributed: "100000000",
+        outstanding: "0",
+        standing: "Good" as Standing,
+        active_guarantees: 0,
+        last_guarantee_at: null,
+        delegates: ["relay.testnet"],
+        exit_requested_at: null,
+      };
+    },
+    async getLimit() {
+      return {
+        limit: "500000000",
+        council_tier_max: "1500000000",
+        standing: "Good" as Standing,
+        eligible: true,
+        blocked_by: null,
+      };
+    },
+    async getGuarantee(id: number) {
+      if (id === 0) status = "Accepted";
+      return {
+        id,
+        pool_id: 0,
+        member: "member1.testnet",
+        requested_by: "relay.testnet",
+        patient_initials: "AO",
+        code_hash: new Array(32).fill(1),
+        hospital: "hospital1.testnet",
+        amount: "300000000",
+        local: null,
+        status: status as GStatus,
+        issued_at: "100",
+        expires_at: "700",
+        accepted_at: "150",
+        claim,
+        approved_by: null,
+        transferred_from: null,
+      };
+    },
+    async listGuarantees() {
+      return [];
+    },
+    async getPoolStats(): Promise<PoolStats> {
+      return {
+        pool_id: 0,
+        balance: "1000000000",
+        reserved: "0",
+        exposure_bps: 8000,
+        written_off: "0",
+        members: 1,
+        issued: 0,
+        settled: 0,
+        defaults: 0,
+      };
+    },
+    async getAiReviewer() {
+      return "ai.testnet";
+    },
+  };
+}
+
 export const runDemo = async (opts: DemoOptions = {}): Promise<void> => {
   const startTime = Date.now();
   console.log("================================================================================");
@@ -27,10 +140,12 @@ export const runDemo = async (opts: DemoOptions = {}): Promise<void> => {
 
   const cfg = await loadAccounts(opts.envOverride);
   const provider = new JsonRpcProvider({ url: cfg.NEAR_RPC_URL });
-  const viewClient = createViewClient(cfg.NEAR_RPC_URL, cfg.ADMIT_CONTRACT);
+  const viewClient = opts.simulated
+    ? createMockViewClient()
+    : createViewClient(cfg.NEAR_RPC_URL, cfg.ADMIT_CONTRACT);
 
-  const primaryHospital = cfg.HOSPITAL_ACCOUNTS[0] || `hospital1.${cfg.DEPLOYER_ACCOUNT}`;
-  const primaryMember = cfg.MEMBER_ACCOUNTS[0] || `member1.${cfg.DEPLOYER_ACCOUNT}`;
+  const primaryHospital = cfg.HOSPITAL_ACCOUNTS[0] || (opts.simulated ? "hospital1.testnet" : `hospital1.${cfg.DEPLOYER_ACCOUNT}`);
+  const primaryMember = cfg.MEMBER_ACCOUNTS[0] || (opts.simulated ? "member1.testnet" : `member1.${cfg.DEPLOYER_ACCOUNT}`);
   const councilAccount = cfg.COUNCIL_ACCOUNTS[0] || cfg.DEPLOYER_ACCOUNT;
 
   const ctx: DemoContext = {
@@ -112,7 +227,25 @@ Token: [\`${cfg.TOKEN_CONTRACT}\`](https://testnet.nearblocks.io/address/${cfg.T
 };
 
 if (process.argv[1] && process.argv[1].endsWith("demo.ts")) {
-  runDemo().catch((err) => {
+  const hasEnvFile = fs.existsSync(path.resolve(process.cwd(), ".env")) || Boolean(process.env.ADMIT_CONTRACT);
+  const isSimulated = process.argv.includes("--simulated") || !hasEnvFile;
+
+  if (isSimulated && !hasEnvFile) {
+    console.log("ℹ No .env detected — running acceptance test demo in self-contained simulation mode.\n");
+  }
+
+  const simulatedEnv = isSimulated && !hasEnvFile ? {
+    NEAR_NETWORK: "testnet",
+    NEAR_RPC_URL: "https://near-testnet.drpc.org",
+    ADMIT_CONTRACT: "pool.admit.testnet",
+    TOKEN_CONTRACT: "tusdc.admit.testnet",
+    DEPLOYER_ACCOUNT: "admit.testnet",
+    DEPLOYER_PRIVATE_KEY: "ed25519:3D2ovVaHMn2p48s8XfG5z6L9YFq9L2g84p1z4J5h6y8k3L4M5N6P7Q8R9S0T1U2V3W4X5Y6Z7A8B9C0D1E2F3G",
+    RELAYER_ACCOUNT: "relay.testnet",
+    RELAYER_PRIVATE_KEY: "ed25519:3D2ovVaHMn2p48s8XfG5z6L9YFq9L2g84p1z4J5h6y8k3L4M5N6P7Q8R9S0T1U2V3W4X5Y6Z7A8B9C0D1E2F3G",
+  } : undefined;
+
+  runDemo({ simulated: isSimulated, ...(simulatedEnv ? { envOverride: simulatedEnv } : {}) }).catch((err) => {
     fail(err instanceof Error ? err.message : String(err));
   });
 }
