@@ -19,7 +19,7 @@ export const step = (n: number, title: string): string => {
   return message;
 };
 
-export const fail = (msg: string): never => {
+export function fail(msg: string): never {
   console.error(`✖ ${msg}`);
-  process.exit(1);
-};
+  throw new Error(msg);
+}

@@ -24,14 +24,14 @@ export interface SeedResult {
 
 export const CALIBRATED_POOL_PARAMS: PoolParams = {
   monthly_contribution: "5000000", // $5 USDC
-  min_tenure_months: 1,
-  base_limit: "100000000", // $100 USDC
-  limit_per_month: "2500000", // $25 USDC
-  max_limit: "400000000", // $400 USDC
+  min_tenure_months: 0,
+  base_limit: "300000000", // $300 USDC (calibrated to emergency deposit size ≈ ₦500k)
+  limit_per_month: "25000000", // $25 USDC
+  max_limit: "600000000", // $600 USDC
   late_limit_bps: 5000,
   max_exposure_bps: 8000,
   max_active_per_member: 2,
-  cooldown: "2592000000000000", // 30 days in ns
+  cooldown: "0", // 0 in demo mode
   guarantee_ttl: "604800000000000", // 7 days in ns
   dispute_window: "1209600000000000", // 14 days in ns
   pool_covered_bps: 7000, // 70% mutual aid
@@ -237,6 +237,43 @@ export const seedPool = async (opts: SeedOptions = {}): Promise<SeedResult> => {
       } catch {
         console.log(`Note: Delegate ${cfg.RELAYER_ACCOUNT} already added`);
       }
+    }
+
+    // Fund pool reserve with 5,000 tUSDC liquidity
+    try {
+      const deployerKp = getKeyPair(cfg.DEPLOYER_ACCOUNT, cfg);
+      const deployerSigner = new KeyPairSigner(deployerKp);
+      const deployerAcc = new Account(cfg.DEPLOYER_ACCOUNT, provider, deployerSigner);
+      const reserveAmount = "5000000000"; // 5,000 tUSDC
+      await deployerAcc.signAndSendTransaction({
+        receiverId: cfg.TOKEN_CONTRACT,
+        actions: [
+          actions.functionCall(
+            "mint",
+            { account_id: cfg.DEPLOYER_ACCOUNT, amount: reserveAmount },
+            30_000_000_000_000n,
+            0n,
+          ),
+        ],
+      });
+      await deployerAcc.signAndSendTransaction({
+        receiverId: cfg.TOKEN_CONTRACT,
+        actions: [
+          actions.functionCall(
+            "ft_transfer_call",
+            {
+              receiver_id: cfg.ADMIT_CONTRACT,
+              amount: reserveAmount,
+              msg: JSON.stringify({ topup: 0 }),
+            },
+            100_000_000_000_000n,
+            1n,
+          ),
+        ],
+      });
+      console.log(`✔ Funded pool reserve with 5,000 tUSDC`);
+    } catch {
+      // already funded
     }
   } catch (err: unknown) {
     console.warn("Member setup notice:", err instanceof Error ? err.message : err);
