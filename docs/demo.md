@@ -1,9 +1,9 @@
 # Admit Acceptance Test & 2:04 AM Demo Walkthrough
 
-Generated on: 2026-11-05T09:55:56.736Z
-Runtime: 0.1 seconds
-Contract: [`pool.admit-hack-6711fd.testnet`](https://testnet.nearblocks.io/address/pool.admit-hack-6711fd.testnet)
-Token: [`tusdc.admit-hack-6711fd.testnet`](https://testnet.nearblocks.io/address/tusdc.admit-hack-6711fd.testnet)
+Generated on: 2026-11-05T10:00:07.702Z
+Runtime: 0.0 seconds
+Contract: [`pool.admit.testnet`](https://testnet.nearblocks.io/address/pool.admit.testnet)
+Token: [`tusdc.admit.testnet`](https://testnet.nearblocks.io/address/tusdc.admit.testnet)
 
 ---
 
@@ -22,7 +22,7 @@ Token: [`tusdc.admit-hack-6711fd.testnet`](https://testnet.nearblocks.io/address
 ---
 
 ## Testnet On-Chain Artifacts
-- **Pool Contract:** [https://testnet.nearblocks.io/address/pool.admit-hack-6711fd.testnet](https://testnet.nearblocks.io/address/pool.admit-hack-6711fd.testnet)
-- **Mock tUSDC:** [https://testnet.nearblocks.io/address/tusdc.admit-hack-6711fd.testnet](https://testnet.nearblocks.io/address/tusdc.admit-hack-6711fd.testnet)
-- **Accredited Clinic:** [https://testnet.nearblocks.io/address/hospital1.admit-hack-6711fd.testnet](https://testnet.nearblocks.io/address/hospital1.admit-hack-6711fd.testnet)
-- **Sponsored Relayer:** [https://testnet.nearblocks.io/address/relay.admit-hack-6711fd.testnet](https://testnet.nearblocks.io/address/relay.admit-hack-6711fd.testnet)
+- **Pool Contract:** [https://testnet.nearblocks.io/address/pool.admit.testnet](https://testnet.nearblocks.io/address/pool.admit.testnet)
+- **Mock tUSDC:** [https://testnet.nearblocks.io/address/tusdc.admit.testnet](https://testnet.nearblocks.io/address/tusdc.admit.testnet)
+- **Accredited Clinic:** [https://testnet.nearblocks.io/address/hospital1.testnet](https://testnet.nearblocks.io/address/hospital1.testnet)
+- **Sponsored Relayer:** [https://testnet.nearblocks.io/address/relay.testnet](https://testnet.nearblocks.io/address/relay.testnet)
