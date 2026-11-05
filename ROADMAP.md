@@ -8,8 +8,8 @@
 | **Last updated** | 2026-11-04 |
 | **Current phase** | P6 — Testnet deployment & DAO |
 | **Next task** | P6 (#110–#116) |
-| **Must progress** | 88 / 105 Must tasks done (84%) |
-| **Overall progress** | 97 / 114 tasks done (85%) — 105 Must · 6 Should · 3 Could |
+| **Must progress** | 92 / 105 Must tasks done (88%) |
+| **Overall progress** | 101 / 114 tasks done (89%) — 105 Must · 6 Should · 3 Could |
 | **Submission deadline** | 14 Nov 2026, 23:59 UTC (internal target: **14 Nov 18:00 UTC**) |
 | **Days left** | 10 |
 
