@@ -123,6 +123,9 @@ const createMockContext = (): DemoContext => {
           defaults: 0,
         };
       },
+      async getAiReviewer() {
+        return "ai.testnet";
+      },
     },
     memberAccount: "member1.testnet",
     hospitalAccount: "hospital1.testnet",

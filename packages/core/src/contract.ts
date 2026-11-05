@@ -3,6 +3,7 @@
 import { JsonRpcProvider } from "near-api-js";
 import { z } from "zod";
 import {
+  type AiReview,
   Guarantee,
   type Hospital,
   LimitView,
@@ -19,6 +20,7 @@ export interface ViewClient {
   getLimit(poolId: number, account: string): Promise<LimitView>;
   getGuarantee(id: number): Promise<Guarantee | null>;
   listGuarantees(poolId: number, fromIndex?: number, limit?: number): Promise<Guarantee[]>;
+  getAiReviewer(): Promise<string | null>;
 }
 
 export interface FunctionCall {
@@ -74,6 +76,11 @@ export const createViewClient = (rpcUrl: string, contractId: string): ViewClient
         limit,
       });
       return z.array(Guarantee).parse(res);
+    },
+    async getAiReviewer(): Promise<string | null> {
+      const res = await view("get_ai_reviewer");
+      if (typeof res === "string") return res;
+      return null;
     },
   };
 };
@@ -300,6 +307,14 @@ export const calls = {
   councilMarkDefault: (a: { pool_id: number; member: string }): FunctionCall => ({
     methodName: "council_mark_default",
     args: { pool_id: a.pool_id, member: a.member },
+    gas: TGAS_30,
+    deposit: 0n,
+  }),
+
+  // --- AI review methods (Issue #185 / A-12.1) ---
+  postAiReview: (a: { guarantee_id: number; review: AiReview }): FunctionCall => ({
+    methodName: "post_ai_review",
+    args: { guarantee_id: a.guarantee_id, review: a.review },
     gas: TGAS_30,
     deposit: 0n,
   }),

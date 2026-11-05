@@ -1,0 +1,13 @@
+{
+  "hospital": "St. Mark's Hospital",
+  "patient_initials": "AO",
+  "admission_date": "2026-11-05",
+  "lines": [
+    { "item": "Emergency Admission & Triage", "amount": 50, "currency": "USDC" },
+    { "item": "Rapid Blood Panel & Labs", "amount": 60, "currency": "USDC" },
+    { "item": "Ultrasound / Diagnostic Imaging", "amount": 70, "currency": "USDC" },
+    { "item": "Intravenous Antibiotics & Fluids", "amount": 70, "currency": "USDC" },
+    { "item": "Overnight Observation Bed", "amount": 30, "currency": "USDC" }
+  ],
+  "total": 280
+}

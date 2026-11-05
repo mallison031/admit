@@ -220,7 +220,7 @@ Admit is **100% ready** when all of these are true:
 ### P12 — Optional (Could)
 | ID | Pri | Task | Done when | Depends | Status | Done | Notes |
 |---|---|---|---|---|---|---|---|
-| A-12.1 | C | AI bill check: NEAR AI Cloud attestation + completion + signature verification, cited reference list, advisory panel | Verified panel renders; `post_ai_review` stores result | All M done | ⬜ | | Cut order #1 |
+| A-12.1 | C | AI bill check: NEAR AI Cloud attestation + completion + signature verification, cited reference list, advisory panel | Verified panel renders; `post_ai_review` stores result | All M done | ✅ | 2026-11-05 | |
 | A-12.2 | C | 1Click any-chain top-up UI (dry-run quote) | Quote shown on `/member` | A-8.7 | ✅ | 2026-11-05 | |
 
 ### P13 — Documentation, deployment, submission
@@ -263,6 +263,7 @@ Admit is **100% ready** when all of these are true:
 ## 6. Changelog (newest first)
 | Date | Tasks | Change | Tests |
 |---|---|---|---|
+| 2026-11-05 | A-12.1 | P12: implement NEAR AI Cloud TDX attestation verification (scripts/verify-attestation.ts), advisory review API (/ai/review with cited reference list and on-chain post_ai_review), contract post_ai_review and set_ai_reviewer methods, and AiReviewPanel component on /council. | 18 API tests ✅ · 28 scripts tests ✅ · 20 web tests ✅ · 133 contract tests ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-12.2 | P12: implement 1Click cross-chain top-up quote component on /member with multi-chain selector (Ethereum, Arbitrum, Base, Solana) and live dry-run quote from POST /quote. | 18 tests in @admit/web ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-11.1, A-11.2, A-11.3, A-11.4, A-11.5, A-11.6, A-11.7, A-11.8 | P11: 7-step PRD §8 acceptance test and demo CLI implemented in scripts/demo/{step1..step7}.ts and scripts/demo.ts; verified with two consecutive clean testnet runs (< 5 min) and docs/demo.md generated. | 21 scripts tests ✅ · live testnet demo ✅ · pnpm lint ✅ |
 | 2026-11-05 | A-6.1, A-6.2, A-6.3, A-6.4 | P6: complete testnet deployment & DAO integration: scripts/deploy-testnet.ts (idempotent contract deploy & storage deposit with explorer links), scripts/seed.ts (calibrated St. Mark's pool, 2 hospitals, council list, member enrolment, delegate pairing), and scripts/lib/scoped-keys.ts (function-call keys scoped to relayer allowlist). | 13 tests in @admit/scripts ✅ · pnpm deploy:testnet ✅ · pnpm seed ✅ · pnpm lint ✅ · pnpm test ✅ |

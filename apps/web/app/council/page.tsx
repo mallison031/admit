@@ -4,6 +4,7 @@
 import { calls, formatAmount, type Guarantee } from "@admit/core";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { AiReviewPanel } from "../../components/AiReviewPanel";
 import { AmountInput } from "../../components/AmountInput";
 import { ExplorerLink } from "../../components/ExplorerLink";
 import { getContractId, getNetwork, getViewClient } from "../../lib/config";
@@ -248,6 +249,10 @@ export default function CouncilPage() {
                     ${formatAmount(BigInt(g.amount), 6)} USDC
                   </span>
                 </div>
+
+                {g.claim?.ai_review && (
+                  <AiReviewPanel review={g.claim.ai_review} />
+                )}
 
                 <button
                   type="button"

@@ -7,6 +7,8 @@ export const Env = z.object({
   ADMIT_CONTRACT: z.string(),
   RELAYER_ACCOUNT: z.string(),
   RELAYER_PRIVATE_KEY: z.string(),
+  AI_REVIEWER_ACCOUNT: z.string().optional(),
+  AI_REVIEWER_PRIVATE_KEY: z.string().optional(),
   API_PORT: z.coerce.number().int().default(8787),
   RELAY_RATE_LIMIT_PER_MIN: z.coerce.number().int().default(20),
   ONECLICK_API_KEY: z.string().optional(),
