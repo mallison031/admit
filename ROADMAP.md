@@ -231,7 +231,7 @@ Admit is **100% ready** when all of these are true:
 | A-13.3 | M | README: limitations (insurance classification, fiat cash-out, hospital adoption), threat model summary | Matches ARCHITECTURE §11 | A-13.1 | ✅ | 2026-11-05 | |
 | A-13.4 | M | README: library list + AI-generated code disclosure (hackathon rule), no AI attribution in git history | Present | A-13.1 | ✅ | 2026-11-05 | |
 | A-13.5 | M | README: name the second project if the user enters two (hackathon rule) | Present or N/A noted | user decision | ✅ | 2026-11-05 | N/A (Sole Entry) noted in README |
-| A-13.6 | M | Deploy web to Vercel (testnet config) | Public URL works on a phone | P9 | ⬜ | | Ask before deploying |
+| A-13.6 | M | Deploy web to Vercel (testnet config) | Public URL works on a phone | P9 | 🟡 | 2026-11-11 | Production build verified; Vercel deployment guide ready in docs/vercel-deployment.md |
 | A-13.7 | M | Screenshots + simulation chart in README | Present | A-13.6, A-10.2 | ✅ | 2026-11-05 | 5 mobile UI screenshots and Monte Carlo chart embedded in README |
 | A-13.8 | M | Demo video (2am story, ≤ 2 min) | File ready for user review | A-11.8, A-13.6 | 🟡 | | Storyboard and script ready in docs/video-script.md |
 | A-13.9 | M | X post draft (built at NEAR HACKATHON, @NEARProtocol, #NEARHackathon, video) | Draft approved by user; **posted only with explicit OK** | A-13.8 | 🟡 | | Draft prepared in docs/x-post.md; awaiting maintainer approval |
